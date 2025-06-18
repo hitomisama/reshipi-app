@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 import EditScreenInfo from '@/components/home/homepage';
 import { Text, View } from '@/components/Themed';
@@ -9,6 +9,13 @@ import HomeContent from '@/components/home/BudgetInputSection';
 export default function TabOneScreen() {
   // モーダルの表示状態を管理するステート
   const [modalVisible, setModalVisible] = useState(false);
+  // 結果メッセージの状態
+  const [resultMessage, setResultMessage] = useState({
+    visible: false,
+    success: false,
+    message: ''
+  });
+  
   const budget = useBudgetStore((state) => state.budget);
 
   // モーダルを開く関数
@@ -20,12 +27,37 @@ export default function TabOneScreen() {
   const closeModal = () => {
     setModalVisible(false);
   };
+  
+  // 結果メッセージを閉じる関数
+  const closeResultMessage = () => {
+    setResultMessage({...resultMessage, visible: false});
+  };
+  
+  // ログイン処理の結果を処理する関数
+  const handleLoginResult = useCallback((success: boolean, message: string) => {
+    // モーダルを閉じる
+    closeModal();
+    
+    // 結果メッセージを設定して表示
+    setResultMessage({
+      visible: true,
+      success: success,
+      message: message
+    });
+    
+    // 3秒後にメッセージを自動的に非表示にする
+    setTimeout(() => {
+      closeResultMessage();
+    }, 3000);
+  }, []);
 
   return (
-    <View style={styles.container}>      
+    <View style={styles.container}>
+      <Text>予算{budget}円</Text>
+      
       {/* テキストをクリックするとモーダルが開く */}
       <TouchableOpacity onPress={openModal}>
-        <Text style={styles.modalTrigger}>予算{budget}円</Text>
+        <Text style={styles.modalTrigger}>予算を設定する</Text>
       </TouchableOpacity>
       
       {/* モーダルコンポーネント */}
@@ -37,9 +69,41 @@ export default function TabOneScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <HomeContent />
+            {/* HomeContentにログイン結果を処理するハンドラーを渡す */}
+            <HomeContent onLoginResult={handleLoginResult} />
             <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>閉じる</Text>
+              <Text style={styles.closeButtonText}>キャンセル</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* 結果メッセージのモーダル */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={resultMessage.visible}
+        onRequestClose={closeResultMessage}
+      >
+        <View style={styles.resultContainer}>
+          <View style={[
+            styles.resultContent, 
+            resultMessage.success ? styles.successContent : styles.errorContent
+          ]}>
+            <Text style={[
+              styles.resultText, 
+              resultMessage.success ? styles.successText : styles.errorText
+            ]}>
+              {resultMessage.message}
+            </Text>
+            <TouchableOpacity 
+              onPress={closeResultMessage} 
+              style={[
+                styles.resultButton, 
+                resultMessage.success ? styles.successButton : styles.errorButton
+              ]}
+            >
+              <Text style={styles.resultButtonText}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -47,6 +111,7 @@ export default function TabOneScreen() {
       
       <Text style={styles.title}>Tab One</Text>
       {/* 区切り線 */}
+      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/index.tsx" />
     </View>
   );
@@ -107,6 +172,74 @@ const styles = StyleSheet.create({
   },
   // 閉じるボタンのテキストスタイル
   closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  // 結果メッセージコンテナのスタイル
+  resultContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  // 結果メッセージコンテンツの共通スタイル
+  resultContent: {
+    width: '70%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 5
+  },
+  // 成功メッセージコンテンツのスタイル
+  successContent: {
+    borderLeftWidth: 5,
+    borderLeftColor: '#4CAF50',
+  },
+  // エラーメッセージコンテンツのスタイル
+  errorContent: {
+    borderLeftWidth: 5,
+    borderLeftColor: '#F44336',
+  },
+  // 結果メッセージテキストの共通スタイル
+  resultText: {
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  // 成功メッセージテキストのスタイル
+  successText: {
+    color: '#4CAF50',
+  },
+  // エラーメッセージテキストのスタイル
+  errorText: {
+    color: '#F44336',
+  },
+  // 結果メッセージボタンの共通スタイル
+  resultButton: {
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginTop: 10
+  },
+  // 成功メッセージボタンのスタイル
+  successButton: {
+    backgroundColor: '#4CAF50',
+  },
+  // エラーメッセージボタンのスタイル
+  errorButton: {
+    backgroundColor: '#F44336',
+  },
+  // 結果メッセージボタンテキストのスタイル
+  resultButtonText: {
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center'

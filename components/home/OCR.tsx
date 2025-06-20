@@ -29,6 +29,11 @@ export default function OCRScreen() {
       // 如果未找到密钥，输出警告
       console.warn('API密钥未配置，OCR功能将不可用');
     }
+
+    console.log("完整的Constants对象:", JSON.stringify(Constants, null, 2));
+    console.log("API密钥:", Constants.expoConfig?.extra?.apiKey);
+    // 或尝试旧版访问方式
+    console.log("旧版API密钥:", Constants.manifest?.extra?.apiKey);
   }, []); // 空依赖数组表示仅在组件挂载时执行一次
 
   // 图片选择函数 - 处理用户选择或拍摄图片的逻辑

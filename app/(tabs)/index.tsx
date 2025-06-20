@@ -5,6 +5,7 @@ import EditScreenInfo from '@/components/home/homepage';
 import { Text, View } from '@/components/Themed';
 import { useBudgetStore } from '../store/budgetStore';
 import HomeContent from '@/components/home/BudgetInputSection';
+import ModalManager from '@/components/home/ModalManager';
 
 export default function TabOneScreen() {
   // モーダルの表示状態を管理するステート
@@ -60,54 +61,14 @@ export default function TabOneScreen() {
         <Text style={styles.modalTrigger}>予算を設定する</Text>
       </TouchableOpacity>
       
-      {/* モーダルコンポーネント */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {/* HomeContentにログイン結果を処理するハンドラーを渡す */}
-            <HomeContent onLoginResult={handleLoginResult} />
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>キャンセル</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      
-      {/* 結果メッセージのモーダル */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resultMessage.visible}
-        onRequestClose={closeResultMessage}
-      >
-        <View style={styles.resultContainer}>
-          <View style={[
-            styles.resultContent, 
-            resultMessage.success ? styles.successContent : styles.errorContent
-          ]}>
-            <Text style={[
-              styles.resultText, 
-              resultMessage.success ? styles.successText : styles.errorText
-            ]}>
-              {resultMessage.message}
-            </Text>
-            <TouchableOpacity 
-              onPress={closeResultMessage} 
-              style={[
-                styles.resultButton, 
-                resultMessage.success ? styles.successButton : styles.errorButton
-              ]}
-            >
-              <Text style={styles.resultButtonText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* 弹窗和结果消息弹窗由ModalManager统一管理 */}
+      <ModalManager
+        modalVisible={modalVisible}
+        closeModal={closeModal}
+        resultMessage={resultMessage}
+        closeResultMessage={closeResultMessage}
+        handleLoginResult={handleLoginResult}
+      />
       
       <Text style={styles.title}>Tab One</Text>
       {/* 区切り線 */}

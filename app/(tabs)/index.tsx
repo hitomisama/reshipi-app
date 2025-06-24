@@ -6,6 +6,7 @@ import { Text, View } from '@/components/Themed';
 import { useBudgetStore } from '../store/budgetStore';
 import HomeContent from '@/components/home/BudgetInputSection';
 import ModalManager from '@/components/home/ModalManager';
+import OCRScreen from '@/components/home/OCR';
 
 export default function TabOneScreen() {
   // モーダルの表示状態を管理するステート
@@ -69,11 +70,10 @@ export default function TabOneScreen() {
         closeResultMessage={closeResultMessage}
         handleLoginResult={handleLoginResult}
       />
+
+      {/* OCR功能区块 */}
+      <OCRScreen />
       
-      <Text style={styles.title}>Tab One</Text>
-      {/* 区切り線 */}
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
     </View>
   );
 }

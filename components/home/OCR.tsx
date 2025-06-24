@@ -247,16 +247,16 @@ export default function OCRScreen() {
       {/* 按钮区域，包含拍照和图库选择 */}
       <View style={styles.buttonContainer}>
         <Button
-          title="📷 拍照识别"
+          title="写真を撮る"
           onPress={takePhoto}
           disabled={isLoading || !apiConfigured}
         />
         <View style={{ height: 10 }} />
-        <Button
+        {/* <Button
           title="🖼 从图库选择"
           onPress={pickImage}
           disabled={isLoading || !apiConfigured}
-        />
+        /> */}
       </View>
       
       {/* 加载状态指示器 */}
@@ -284,7 +284,7 @@ export default function OCRScreen() {
 
       {items.length > 0 && (
         <View style={styles.textContainer}>
-          <Text style={styles.resultText}>🧾 商品明细：</Text>
+          <Text style={styles.resultText}>商品明细：</Text>
           {items.map((item, index) => (
             <Text key={index} style={styles.resultText}>
               {item.name}：{item.price}円

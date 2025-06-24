@@ -74,10 +74,6 @@ export default function TabOneScreen() {
       {/* OCR功能区块 */}
       <OCRScreen />
       
-      <Text style={styles.title}>Tab One</Text>
-      {/* 区切り線 */}
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
     </View>
   );
 }

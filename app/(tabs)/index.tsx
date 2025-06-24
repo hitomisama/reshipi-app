@@ -1,78 +1,56 @@
-import { StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { useState, useCallback } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import EditScreenInfo from '@/components/home/homepage';
 import { Text, View } from '@/components/Themed';
-import { useBudgetStore } from '../store/budgetStore';
-import HomeContent from '@/components/home/BudgetInputSection';
-import ModalManager from '@/components/home/ModalManager';
-import OCRScreen from '@/components/home/OCR';
+import { useBudgetStore } from '@/app/store/budgetStore';
+import BudgetSettingModal from '@/components/home/BudgetSettingModal';
 
 export default function TabOneScreen() {
-  // モーダルの表示状態を管理するステート
+  // 管理模态框显示状态的状态变量
   const [modalVisible, setModalVisible] = useState(false);
-  // 結果メッセージの状態
-  const [resultMessage, setResultMessage] = useState({
-    visible: false,
-    success: false,
-    message: ''
-  });
-  
   const budget = useBudgetStore((state) => state.budget);
 
-  // モーダルを開く関数
+  // 打开模态框的函数
   const openModal = () => {
     setModalVisible(true);
   };
 
-  // モーダルを閉じる関数
+  // 关闭模态框的函数
   const closeModal = () => {
     setModalVisible(false);
   };
   
-  // 結果メッセージを閉じる関数
-  const closeResultMessage = () => {
-    setResultMessage({...resultMessage, visible: false});
+  // 导航到相机屏幕的函数
+  const navigateToCamera = () => {
+    router.push('/camera');
   };
-  
-  // ログイン処理の結果を処理する関数
-  const handleLoginResult = useCallback((success: boolean, message: string) => {
-    // モーダルを閉じる
-    closeModal();
-    
-    // 結果メッセージを設定して表示
-    setResultMessage({
-      visible: true,
-      success: success,
-      message: message
-    });
-    
-    // 3秒後にメッセージを自動的に非表示にする
-    setTimeout(() => {
-      closeResultMessage();
-    }, 3000);
-  }, []);
 
   return (
     <View style={styles.container}>
-      <Text>予算{budget}円</Text>
+      <Text>预算{budget}日元</Text>
       
-      {/* テキストをクリックするとモーダルが開く */}
+      {/* 点击文本打开模态框 */}
       <TouchableOpacity onPress={openModal}>
-        <Text style={styles.modalTrigger}>予算を設定する</Text>
+        <Text style={styles.modalTrigger}>设置预算</Text>
       </TouchableOpacity>
       
-      {/* 弹窗和结果消息弹窗由ModalManager统一管理 */}
-      <ModalManager
-        modalVisible={modalVisible}
-        closeModal={closeModal}
-        resultMessage={resultMessage}
-        closeResultMessage={closeResultMessage}
-        handleLoginResult={handleLoginResult}
+      {/* 相机按钮 */}
+      <TouchableOpacity 
+        style={styles.cameraButton}
+        onPress={navigateToCamera}
+      >
+        <Ionicons name="camera" size={28} color="white" />
+        <Text style={styles.cameraButtonText}>扫描收据</Text>
+      </TouchableOpacity>
+      
+      {/* 预算设置模态框组件 */}
+      <BudgetSettingModal
+        visible={modalVisible}
+        onClose={closeModal}
       />
-
-      {/* OCR功能区块 */}
-      <OCRScreen />
       
     </View>
   );
@@ -93,116 +71,29 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
-  // モーダルトリガーのスタイル
+  // 模态框触发器样式
   modalTrigger: {
     fontSize: 16,
     color: '#2196F3',
     padding: 10,
     marginVertical: 15,
   },
-  // モーダルコンテナのスタイル
-  modalContainer: {
-    flex: 1,
+  // 相机按钮样式
+  cameraButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  // モーダルコンテンツのスタイル
-  modalContent: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
-  },
-  // 閉じるボタンのスタイル
-  closeButton: {
-    marginTop: 20,
-    backgroundColor: '#2196F3',
-    borderRadius: 5,
-    padding: 10,
-    elevation: 2
-  },
-  // 閉じるボタンのテキストスタイル
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  // 結果メッセージコンテナのスタイル
-  resultContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  // 結果メッセージコンテンツの共通スタイル
-  resultContent: {
-    width: '70%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 5
-  },
-  // 成功メッセージコンテンツのスタイル
-  successContent: {
-    borderLeftWidth: 5,
-    borderLeftColor: '#4CAF50',
-  },
-  // エラーメッセージコンテンツのスタイル
-  errorContent: {
-    borderLeftWidth: 5,
-    borderLeftColor: '#F44336',
-  },
-  // 結果メッセージテキストの共通スタイル
-  resultText: {
-    fontSize: 16,
-    marginBottom: 10,
-    textAlign: 'center'
-  },
-  // 成功メッセージテキストのスタイル
-  successText: {
-    color: '#4CAF50',
-  },
-  // エラーメッセージテキストのスタイル
-  errorText: {
-    color: '#F44336',
-  },
-  // 結果メッセージボタンの共通スタイル
-  resultButton: {
-    borderRadius: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    marginTop: 10
-  },
-  // 成功メッセージボタンのスタイル
-  successButton: {
     backgroundColor: '#4CAF50',
+    borderRadius: 50,
+    padding: 15,
+    paddingHorizontal: 25,
+    marginVertical: 20,
+    elevation: 4, // 安卓阴影
   },
-  // エラーメッセージボタンのスタイル
-  errorButton: {
-    backgroundColor: '#F44336',
-  },
-  // 結果メッセージボタンテキストのスタイル
-  resultButtonText: {
+  // 相机按钮文本样式
+  cameraButtonText: {
+    marginLeft: 8,
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center'
-  }
+  },
 });

@@ -8,7 +8,7 @@ import {
   Alert,
   Platform
 } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { Stack, router } from 'expo-router';
@@ -16,12 +16,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from '@/components/Themed';
 
 export default function CameraScreen() {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(CameraType.back);
-  const [capturedImage, setCapturedImage] = useState(null);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [type, setType] = useState<'back' | 'front'>('back');
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [galleryPreview, setGalleryPreview] = useState<string | null>(null);
-  const cameraRef = useRef(null);
+  const cameraRef = useRef<any>(null);
 
   // 请求相机和相册权限
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function CameraScreen() {
   };
   
   // 处理OCR识别
-  const processImage = async (imageUri) => {
+  const processImage = async (imageUri: string) => {
     try {
       // 这里调用您的OCR逻辑处理图像
       // 例如: const results = await OCRProcessor.processImage(imageUri);
@@ -182,11 +182,7 @@ export default function CameraScreen() {
               <TouchableOpacity
                 style={styles.flipButton}
                 onPress={() => {
-                  setType(
-                    type === CameraType.back
-                      ? CameraType.front
-                      : CameraType.back
-                  );
+                  setType(type === 'back' ? 'front' : 'back');
                 }}>
                 <Ionicons name="camera-reverse" size={24} color="white" />
               </TouchableOpacity>

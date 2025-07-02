@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import EditScreenInfo from '@/components/home/homepage';
+import EditScreenInfo from '../home/homepage';
 import { Text, View } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
-import BudgetSettingModal from '@/components/home/BudgetSettingModal';
+import BudgetSettingModal from '../home/BudgetSettingModal';
+
 
 export default function TabOneScreen() {
   // 管理模态框显示状态的状态变量
@@ -25,7 +26,7 @@ export default function TabOneScreen() {
   
   // 导航到相机屏幕的函数
   const navigateToCamera = () => {
-    router.push('/camera');
+    router.push('/home/Camera');
   };
 
   return (

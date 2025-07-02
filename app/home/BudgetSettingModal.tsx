@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, Modal, View as RNView } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
-import HomeContent from '@/components/home/BudgetInputSection';
+import HomeContent from './BudgetInputSection';
 
 interface BudgetSettingModalProps {
   visible: boolean;

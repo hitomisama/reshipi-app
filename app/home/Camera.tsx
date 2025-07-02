@@ -6,7 +6,7 @@ import { Text, View } from '@/components/Themed';
 import OCRScreen from './OCR'; 
 // OCRコンポーネントのインポート
 
-export default function CameraScreen() {
+export default function Camera() {
   // ヘルプモーダルの表示状態
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   

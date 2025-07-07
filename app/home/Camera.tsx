@@ -82,20 +82,37 @@ export default function CameraScreen() {
   const pickImage = async () => {
     try {
       setIsProcessing(true);
+      
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.7,
-        allowsEditing: true
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
       });
-      
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setCapturedImage(result.assets[0].uri);
-        processImage(result.assets[0].uri);
-      } else {
-        setIsProcessing(false);
+        const selectedImage = result.assets[0];
+        
+        // 重要：使用 uri 而不是 assetId
+        const imageUri = selectedImage.uri;
+        
+        // 直接导航到结果页面，传递正确的 URI
+        router.push({
+          pathname: '/home/ocrresult',
+          params: { 
+            image: imageUri, // 确保传递的是正确的 URI
+            items: JSON.stringify([
+              { item: "咖啡", price: 380 },
+              { item: "三明治", price: 500 },
+              { item: "矿泉水", price: 120 }
+            ])
+          }
+        });
       }
     } catch (error) {
-      Alert.alert('错误', '选择照片失败，请重试');
+      console.error('选择图片失败:', error);
+      Alert.alert('错误', '选择图片失败');
+    } finally {
       setIsProcessing(false);
     }
   };

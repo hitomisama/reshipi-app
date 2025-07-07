@@ -10,6 +10,22 @@ import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { useBudgetStore } from '@/app/store/budgetStore';
+import * as MediaLibrary from 'expo-media-library';
+
+// 工具函数：将 ph:// URI 转换为本地可用 URI
+async function getLocalUriFromPhUri(phUri: string) {
+  if (phUri.startsWith('ph://')) {
+    const assetId = phUri.replace('ph://', '').split('/')[0];
+    try {
+      const asset = await MediaLibrary.getAssetInfoAsync(assetId);
+      return asset.localUri || asset.uri;
+    } catch (e) {
+      console.warn('无法转换 ph:// uri', e);
+      return null;
+    }
+  }
+  return phUri;
+}
 
 // 定义类型接口
 interface OCRItem {
@@ -28,44 +44,48 @@ export default function OCRResultScreen() {
   const budget = useBudgetStore((state) => state.budget);
   
   useEffect(() => {
-    if (params.image) {
-      setImage(params.image as string);
-    }
-    
-    if (params.items) {
-      try {
-        // 处理 params.items 可能是字符串或字符串数组的情况
-        const itemsData = Array.isArray(params.items) ? params.items[0] : params.items;
-        const parsedItems: OCRItem[] = JSON.parse(itemsData as string);
-        setResults(parsedItems);
-        
-        // 计算总价
-        const sum = parsedItems.reduce((acc, item) => acc + item.price, 0);
-        setTotal(sum);
-      } catch (error) {
-        console.error('解析商品数据失败', error);
-        // 使用硬编码数据作为后备
-        const fallbackResults: OCRItem[] = [
+    async function handleImage() {
+      if (params.image) {
+        const realUri = await getLocalUriFromPhUri(params.image as string);
+        setImage(realUri);
+      }
+      
+      if (params.items) {
+        try {
+          // 处理 params.items 可能是字符串或字符串数组的情况
+          const itemsData = Array.isArray(params.items) ? params.items[0] : params.items;
+          const parsedItems: OCRItem[] = JSON.parse(itemsData as string);
+          setResults(parsedItems);
+          
+          // 计算总价
+          const sum = parsedItems.reduce((acc, item) => acc + item.price, 0);
+          setTotal(sum);
+        } catch (error) {
+          console.error('解析商品数据失败', error);
+          // 使用硬编码数据作为后备
+          const fallbackResults: OCRItem[] = [
+            { item: "咖啡", price: 380 },
+            { item: "三明治", price: 500 },
+            { item: "矿泉水", price: 120 },
+            { item: "税", price: 100 }
+          ];
+          setResults(fallbackResults);
+          setTotal(fallbackResults.reduce((sum, item) => sum + item.price, 0));
+        }
+      } else {
+        // 如果没有传递数据，使用示例数据
+        const exampleResults: OCRItem[] = [
           { item: "咖啡", price: 380 },
           { item: "三明治", price: 500 },
           { item: "矿泉水", price: 120 },
           { item: "税", price: 100 }
         ];
-        setResults(fallbackResults);
-        setTotal(fallbackResults.reduce((sum, item) => sum + item.price, 0));
+        setResults(exampleResults);
+        setTotal(exampleResults.reduce((sum, item) => sum + item.price, 0));
       }
-    } else {
-      // 如果没有传递数据，使用示例数据
-      const exampleResults: OCRItem[] = [
-        { item: "咖啡", price: 380 },
-        { item: "三明治", price: 500 },
-        { item: "矿泉水", price: 120 },
-        { item: "税", price: 100 }
-      ];
-      setResults(exampleResults);
-      setTotal(exampleResults.reduce((sum, item) => sum + item.price, 0));
     }
-  }, [params]);
+    handleImage();
+  }, [params.image, params.items]);
   
   // 保存结果到预算中
   const saveResults = () => {
@@ -113,8 +133,20 @@ export default function OCRResultScreen() {
             source={{ uri: image }} 
             style={styles.receiptImage}
             resizeMode="contain"
-            onError={() => console.log('图片加载失败')}
+            onError={(error) => {
+              console.log('图片加载失败:', error);
+              setImage(null); // 清除无效的图片 URI
+            }}
+            onLoad={() => console.log('图片加载成功')}
           />
+        )}
+
+        {/* 如果图片加载失败，显示占位符 */}
+        {!image && (
+          <ThemedView style={styles.placeholderImage}>
+            <Ionicons name="image-outline" size={50} color="#ccc" />
+            <ThemedText style={styles.placeholderText}>图片加载失败</ThemedText>
+          </ThemedView>
         )}
         
         {/* OCR结果 */}
@@ -180,6 +212,19 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     marginBottom: 20,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  placeholderText: {
+    marginTop: 10,
+    color: '#666',
   },
   resultsContainer: {
     padding: 15,

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Text as RNText, View as RNView } from 'react-native';
+import { Text as RNText, View as RNView, ViewProps, TextProps } from 'react-native';
 import { useColorScheme } from 'react-native';
 
 const Colors = {
@@ -31,8 +31,8 @@ type ThemeProps = {
   darkColor?: string;
 };
 
-export type ThemedTextProps = ThemeProps & RNText['props'];
-export type ThemedViewProps = ThemeProps & RNView['props'];
+export type ThemedTextProps = ThemeProps & TextProps;
+export type ThemedViewProps = ThemeProps & ViewProps;
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -56,20 +56,10 @@ export function ThemedText(props: ThemedTextProps) {
 }
 
 export function ThemedView(props: ThemedViewProps) {
-  const { style, lightColor, darkColor, children, ...restProps } = props;
+  const { style, lightColor, darkColor, children } = props;
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-
-  const {
-    light,
-    dark,
-    ...safeProps
-  } = restProps as any;
-
   return (
-    <RNView 
-      style={[{ backgroundColor }, style]} 
-      {...safeProps}
-    >
+    <RNView style={[{ backgroundColor }, style]}>
       {children}
     </RNView>
   );

@@ -11,9 +11,80 @@ import {
 import { Camera, CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+import Constants from 'expo-constants';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
+
+// ----------- OCR 识别工具函数 -----------
+async function ocrImageBase64(base64: string) {
+  const apiKey = Constants.expoConfig?.extra?.apiKey;
+  if (!apiKey) throw new Error('API密钥未配置');
+
+  const body = {
+    requests: [
+      {
+        image: { content: base64 },
+        features: [{ type: 'TEXT_DETECTION' }],
+      },
+    ],
+  };
+
+  const res = await fetch(
+    `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(`API错误 (${res.status}): ${errorData.error?.message || res.statusText}`);
+  }
+
+  const data = await res.json();
+  const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+
+  // 解析商品明细（可根据你的逻辑调整）
+  const lines = text.split('\n');
+  const parsed: { item: string; price: number }[] = [];
+  const skipKeywords = ['合計', '小計', '税込', '割引', '釣り', '現金', 'ポイント', '点', '数量', '個'];
+
+  for (let i = 0; i < lines.length; i++) {
+    const current = lines[i].trim();
+    const inlineMatch = current.match(/^(.+?)\s+¥?\s*(\d{2,5})円?/);
+    if (inlineMatch) {
+      const name = inlineMatch[1].trim();
+      const price = parseInt(inlineMatch[2].replace(/,/g, ''));
+      if (name !== '' && price >= 30 && price <= 10000 && !skipKeywords.some(word => name.includes(word))) {
+        parsed.push({ item: name, price });
+      }
+      continue;
+    }
+    if (i + 1 < lines.length) {
+      const nameLine = current;
+      const priceLine = lines[i + 1].trim();
+      const priceMatch = priceLine.match(/^¥?\s*([\d,]+)\s*$/);
+      if (
+        priceMatch &&
+        nameLine !== '' &&
+        !skipKeywords.some(word => nameLine.includes(word)) &&
+        !/数量|個/.test(nameLine)
+      ) {
+        const price = parseInt(priceMatch[1].replace(/,/g, ''));
+        if (price >= 30 && price <= 10000) {
+          parsed.push({ item: nameLine, price });
+          i++;
+        }
+      }
+    }
+  }
+
+  return { text, items: parsed };
+}
+// ----------- OCR 识别工具函数 END -----------
 
 export default function CameraScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -55,30 +126,41 @@ export default function CameraScreen() {
     }
   };
   
-  // 拍照
+  // 拍照并识别
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
         setIsProcessing(true);
-        const photo = await cameraRef.current.takePictureAsync({ quality: 0.7 });
-        
+        const photo = await cameraRef.current.takePictureAsync({ quality: 0.7, base64: true });
         setCapturedImage(photo.uri);
         // 保存照片到相册
         await MediaLibrary.saveToLibraryAsync(photo.uri);
         
         // 刷新预览
         loadLatestPhoto();
-        
-        // 处理OCR
-        processImage(photo.uri);
+
+        // OCR识别
+        if (photo.base64) {
+          const ocrResult = await ocrImageBase64(photo.base64);
+          router.push({
+            pathname: '/home/ocrresult',
+            params: { 
+              image: photo.uri,
+              items: JSON.stringify(ocrResult.items)
+            }
+          });
+        } else {
+          Alert.alert('错误', '未获取到图片base64数据');
+        }
       } catch (error) {
-        Alert.alert('错误', '拍照失败，请重试');
+        Alert.alert('错误', '拍照或识别失败，请重试');
+      } finally {
         setIsProcessing(false);
       }
     }
   };
   
-  // 从相册选择照片
+  // 从相册选择并识别
   const pickImage = async () => {
     try {
       setIsProcessing(true);
@@ -88,51 +170,28 @@ export default function CameraScreen() {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
-        
-        // 重要：使用 uri 而不是 assetId
         const imageUri = selectedImage.uri;
-        
-        // 直接导航到结果页面，传递正确的 URI
-        router.push({
-          pathname: '/home/ocrresult',
-          params: { 
-            image: imageUri, // 确保传递的是正确的 URI
-            items: JSON.stringify([
-              { item: "咖啡", price: 380 },
-              { item: "三明治", price: 500 },
-              { item: "矿泉水", price: 120 }
-            ])
-          }
-        });
+        if (selectedImage.base64) {
+          const ocrResult = await ocrImageBase64(selectedImage.base64);
+          router.push({
+            pathname: '/home/ocrresult',
+            params: { 
+              image: imageUri,
+              items: JSON.stringify(ocrResult.items)
+            }
+          });
+        } else {
+          Alert.alert('错误', '未获取到图片base64数据');
+        }
       }
     } catch (error) {
-      console.error('选择图片失败:', error);
-      Alert.alert('错误', '选择图片失败');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-  
-  // 处理OCR识别
-  const processImage = async (imageUri: string) => {
-    try {
-      // 这里调用您的OCR逻辑处理图像
-      // 例如: const results = await OCRProcessor.processImage(imageUri);
-      
-      // 模拟OCR处理
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 处理完成后，导航到结果页面
-      router.push({
-        pathname: '/home/ocrresult',
-        params: { image: imageUri }
-      });
-    } catch (error) {
-      Alert.alert('错误', '处理图像失败，请重试');
+      console.error('选择图片或识别失败:', error);
+      Alert.alert('错误', '选择图片或识别失败');
     } finally {
       setIsProcessing(false);
     }

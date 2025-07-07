@@ -1,26 +1,97 @@
-import React from 'react';
-import { StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  StyleSheet, 
+  Image, 
+  ScrollView, 
+  TouchableOpacity, 
+  Alert
+} from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Text, View } from '@/components/Themed';
+import { ThemedText, ThemedView } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
+import { useBudgetStore } from '@/app/store/budgetStore';
+
+// 定义类型接口
+interface OCRItem {
+  item: string;
+  price: number;
+}
 
 export default function OCRResultScreen() {
-  const { image } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const [results, setResults] = useState<OCRItem[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [image, setImage] = useState<string | null>(null);
   
-  // 这里通常会有实际的OCR结果数据
-  // 示例数据
-  const results = [
-    { item: "咖啡", price: 380 },
-    { item: "三明治", price: 500 },
-    { item: "矿泉水", price: 120 },
-    { item: "税", price: 100 }
-  ];
+  // 获取预算store函数
+  const setBudget = useBudgetStore((state) => state.setBudget);
+  const budget = useBudgetStore((state) => state.budget);
   
-  // 计算总价
-  const total = results.reduce((sum, item) => sum + item.price, 0);
+  useEffect(() => {
+    if (params.image) {
+      setImage(params.image as string);
+    }
+    
+    if (params.items) {
+      try {
+        // 处理 params.items 可能是字符串或字符串数组的情况
+        const itemsData = Array.isArray(params.items) ? params.items[0] : params.items;
+        const parsedItems: OCRItem[] = JSON.parse(itemsData as string);
+        setResults(parsedItems);
+        
+        // 计算总价
+        const sum = parsedItems.reduce((acc, item) => acc + item.price, 0);
+        setTotal(sum);
+      } catch (error) {
+        console.error('解析商品数据失败', error);
+        // 使用硬编码数据作为后备
+        const fallbackResults: OCRItem[] = [
+          { item: "咖啡", price: 380 },
+          { item: "三明治", price: 500 },
+          { item: "矿泉水", price: 120 },
+          { item: "税", price: 100 }
+        ];
+        setResults(fallbackResults);
+        setTotal(fallbackResults.reduce((sum, item) => sum + item.price, 0));
+      }
+    } else {
+      // 如果没有传递数据，使用示例数据
+      const exampleResults: OCRItem[] = [
+        { item: "咖啡", price: 380 },
+        { item: "三明治", price: 500 },
+        { item: "矿泉水", price: 120 },
+        { item: "税", price: 100 }
+      ];
+      setResults(exampleResults);
+      setTotal(exampleResults.reduce((sum, item) => sum + item.price, 0));
+    }
+  }, [params]);
   
+  // 保存结果到预算中
+  const saveResults = () => {
+    try {
+      // 检查预算是否足够
+      if (budget < total) {
+        Alert.alert('警告', `预算不足！当前预算 ${budget}¥，消费金额 ${total}¥`);
+        return;
+      }
+      
+      // 从预算中扣除消费金额
+      const newBudget = budget - total;
+      setBudget(newBudget);
+      
+      Alert.alert('成功', `收据已保存！消费 ${total}¥，剩余预算 ${newBudget}¥`, [
+        { text: '确定', onPress: () => router.push('/') }
+      ]);
+    } catch (error) {
+      console.error('保存失败:', error);
+      Alert.alert('错误', '保存失败，请重试');
+    }
+  };
+
+  // 在 return 语句中，将所有组件改为使用 ThemedView 和 ThemedText
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <Stack.Screen 
         options={{
           title: '扫描结果',
@@ -37,45 +108,61 @@ export default function OCRResultScreen() {
       
       <ScrollView style={styles.scrollContainer}>
         {/* 扫描的图片 */}
-        <Image 
-          source={{ uri: image }} 
-          style={styles.receiptImage}
-          resizeMode="contain"
-        />
+        {image && (
+          <Image 
+            source={{ uri: image }} 
+            style={styles.receiptImage}
+            resizeMode="contain"
+            onError={() => console.log('图片加载失败')}
+          />
+        )}
         
         {/* OCR结果 */}
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>识别结果</Text>
+        <ThemedView style={styles.resultsContainer}>
+          <ThemedText style={styles.resultsTitle}>识别结果</ThemedText>
           
-          {/* 商品列表 */}
-          <View style={styles.itemsContainer}>
-            {results.map((item, index) => (
-              <View key={index} style={styles.itemRow}>
-                <Text style={styles.itemName}>{item.item}</Text>
-                <Text style={styles.itemPrice}>{item.price}¥</Text>
-              </View>
-            ))}
-            
-            {/* 总价 */}
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>总计</Text>
-              <Text style={styles.totalPrice}>{total}¥</Text>
-            </View>
-          </View>
-          
-          {/* 保存按钮 */}
-          <TouchableOpacity 
-            style={styles.saveButton}
-            onPress={() => {
-              // 实现保存逻辑
-              router.push('/');
-            }}
-          >
-            <Text style={styles.saveButtonText}>保存结果</Text>
-          </TouchableOpacity>
-        </View>
+          {results.length > 0 ? (
+            <ThemedView style={styles.itemsContainer}>
+              {results.map((item, index) => (
+                <ThemedView key={index} style={styles.itemRow}>
+                  <ThemedText style={styles.itemName}>{item.item}</ThemedText>
+                  <ThemedText style={styles.itemPrice}>{item.price}¥</ThemedText>
+                </ThemedView>
+              ))}
+              
+              {/* 总价 */}
+              <ThemedView style={styles.totalRow}>
+                <ThemedText style={styles.totalLabel}>总计</ThemedText>
+                <ThemedText style={styles.totalPrice}>{total}¥</ThemedText>
+              </ThemedView>
+
+              {/* 操作按钮 */}
+              <ThemedView style={styles.buttonsContainer}>
+                <TouchableOpacity 
+                  style={styles.secondaryButton}
+                  onPress={() => router.back()}
+                >
+                  <ThemedText style={styles.secondaryButtonText}>重新扫描</ThemedText>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.saveButton}
+                  onPress={saveResults}
+                >
+                  <ThemedText style={styles.saveButtonText}>保存到预算</ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
+          ) : (
+            <ThemedView style={styles.noResultsContainer}>
+              <ThemedText style={styles.noResultsText}>
+                未能识别到商品信息，请重新扫描
+              </ThemedText>
+            </ThemedView>
+          )}
+        </ThemedView>
       </ScrollView>
-    </View>
+    </ThemedView>
   );
 }
 
@@ -139,16 +226,46 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4CAF50',
   },
+  noResultsContainer: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#F44336',
+    textAlign: 'center',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  secondaryButton: {
+    backgroundColor: '#9E9E9E',
+    borderRadius: 10,
+    padding: 15,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   saveButton: {
     backgroundColor: '#4CAF50',
     borderRadius: 10,
     padding: 15,
+    flex: 1,
+    marginLeft: 10,
     alignItems: 'center',
-    marginTop: 20,
   },
   saveButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
 });

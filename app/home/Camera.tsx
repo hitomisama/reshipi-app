@@ -8,12 +8,12 @@ import {
   Alert,
   Platform
 } from 'react-native';
-import { Camera } from 'expo-camera';
+import { Camera, CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View } from '@/components/Themed';
+import { ThemedText, ThemedView } from '@/components/Themed';
 
 export default function CameraScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -123,14 +123,14 @@ export default function CameraScreen() {
 
   // 处理权限问题
   if (hasPermission === null) {
-    return <View style={styles.container}><Text>请求相机权限...</Text></View>;
+    return <ThemedView style={styles.container}><ThemedText>请求相机权限...</ThemedText></ThemedView>;
   }
   if (hasPermission === false) {
-    return <View style={styles.container}><Text>没有相机权限，请在设置中允许访问</Text></View>;
+    return <ThemedView style={styles.container}><ThemedText>没有相机权限，请在设置中允许访问</ThemedText></ThemedView>;
   }
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/* 导航栏配置 */}
       <Stack.Screen 
         options={{
@@ -145,64 +145,62 @@ export default function CameraScreen() {
 
       {!isProcessing ? (
         <>
-          {/* 相机视图 */}
-          <Camera 
+          {/* 相机视图 - 不包含子组件 */}
+          <CameraView 
             style={styles.camera} 
-            type={type}
+            facing={type}
             ref={cameraRef}
-            ratio="16:9"
-          >
-            <RNView style={styles.buttonContainer}>
-              {/* 相册预览按钮 */}
-              <TouchableOpacity 
-                style={styles.galleryPreview} 
-                onPress={pickImage}
-              >
-                {galleryPreview ? (
-                  <Image 
-                    source={{ uri: galleryPreview }} 
-                    style={styles.previewImage}
-                  />
-                ) : (
-                  <RNView style={styles.placeholderPreview}>
-                    <Ionicons name="images" size={20} color="white" />
-                  </RNView>
-                )}
-              </TouchableOpacity>
+          />
+          
+          {/* 按钮容器 - 使用绝对定位覆盖在相机上 */}
+          <RNView style={styles.buttonContainer}>
+            {/* 相册预览按钮 */}
+            <TouchableOpacity 
+              style={styles.galleryPreview} 
+              onPress={pickImage}
+            >
+              {galleryPreview ? (
+                <Image 
+                  source={{ uri: galleryPreview }} 
+                  style={styles.previewImage}
+                />
+              ) : (
+                <RNView style={styles.placeholderPreview}>
+                  <Ionicons name="images" size={20} color="white" />
+                </RNView>
+              )}
+            </TouchableOpacity>
 
-              {/* 拍照按钮 */}
-              <TouchableOpacity
-                style={styles.captureButton}
-                onPress={takePicture}
-              >
-                <RNView style={styles.captureInner} />
-              </TouchableOpacity>
-              
-              {/* 翻转相机按钮 */}
-              <TouchableOpacity
-                style={styles.flipButton}
-                onPress={() => {
-                  setType(type === 'back' ? 'front' : 'back');
-                }}>
-                <Ionicons name="camera-reverse" size={24} color="white" />
-              </TouchableOpacity>
-            </RNView>
-          </Camera>
+            {/* 拍照按钮 */}
+            <TouchableOpacity
+              style={styles.captureButton}
+              onPress={takePicture}
+            >
+              <RNView style={styles.captureInner} />
+            </TouchableOpacity>
+            
+            {/* 翻转相机按钮 */}
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={() => {
+                setType(type === 'back' ? 'front' : 'back');
+              }}>
+              <Ionicons name="camera-reverse" size={24} color="white" />
+            </TouchableOpacity>
+          </RNView>
           
           {/* 提示文本 */}
-          <RNView style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>
-              拍摄收据或从相册选择图片
-            </Text>
-          </RNView>
+          <ThemedText style={styles.instructionText}>
+            拍摄收据或从相册选择图片
+          </ThemedText>
         </>
       ) : (
         <RNView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
-          <Text style={styles.loadingText}>正在处理图像...</Text>
+          <ThemedText style={styles.loadingText}>正在处理图像...</ThemedText>
         </RNView>
       )}
-    </View>
+    </ThemedView>
   );
 }
 

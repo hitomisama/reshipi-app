@@ -1,10 +1,9 @@
+import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import EditScreenInfo from '../home/homepage';
-import { Text, View } from '@/components/Themed';
+import { ThemedText, ThemedView } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
 import BudgetSettingModal from '../home/BudgetSettingModal';
 
@@ -30,12 +29,12 @@ export default function TabOneScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>预算{budget}日元</Text>
+    <ThemedView style={styles.container}>
+      <ThemedText>预算{budget}日元</ThemedText>
       
       {/* 点击文本打开模态框 */}
       <TouchableOpacity onPress={openModal}>
-        <Text style={styles.modalTrigger}>设置预算</Text>
+        <ThemedText style={styles.modalTrigger}>设置预算</ThemedText>
       </TouchableOpacity>
       
       {/* 相机按钮 */}
@@ -44,7 +43,7 @@ export default function TabOneScreen() {
         onPress={navigateToCamera}
       >
         <Ionicons name="camera" size={28} color="white" />
-        <Text style={styles.cameraButtonText}>扫描收据</Text>
+        <ThemedText style={styles.cameraButtonText}>扫描收据</ThemedText>
       </TouchableOpacity>
       
       {/* 预算设置模态框组件 */}
@@ -53,7 +52,7 @@ export default function TabOneScreen() {
         onClose={closeModal}
       />
       
-    </View>
+    </ThemedView>
   );
 }
 

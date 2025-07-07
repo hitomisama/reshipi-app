@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { Text } from '@/components/Themed';
+import { StyleSheet, TextInput, TouchableOpacity, View, Text } from 'react-native';
 import { useBudgetStore } from '@/app/store/budgetStore';
 
 // プロップスの型定義

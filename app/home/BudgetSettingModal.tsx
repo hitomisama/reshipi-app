@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, View as RNView } from 'react-native';
+import { StyleSheet, TouchableOpacity, Modal, View as RNView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View } from '@/components/Themed';
+import { ThemedText, ThemedView } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
-import HomeContent from './BudgetInputSection';
 
 interface BudgetSettingModalProps {
   visible: boolean;
@@ -16,7 +15,9 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
 }) => {
   // 管理成功提示模态框的状态
   const [successVisible, setSuccessVisible] = useState(false);
+  const [inputBudget, setInputBudget] = useState('');
   const budget = useBudgetStore((state) => state.budget);
+  const setBudget = useBudgetStore((state) => state.setBudget);
   
   // 使用useRef存储前一次的预算值，用于比较是否发生变化
   const prevBudgetRef = useRef(budget);
@@ -46,6 +47,15 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
     setSuccessVisible(false);
   };
 
+  // 保存预算的函数
+  const saveBudget = () => {
+    const budgetValue = parseFloat(inputBudget);
+    if (!isNaN(budgetValue) && budgetValue > 0) {
+      setBudget(budgetValue);
+      setInputBudget('');
+    }
+  };
+
   return (
     <>
       {/* 预算输入模态框 */}
@@ -55,14 +65,26 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         visible={visible}
         onRequestClose={onClose}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <HomeContent />
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>关闭</Text>
+        <ThemedView style={styles.modalContainer}>
+          <ThemedView style={styles.modalContent}>
+            {/* 临时替换 HomeContent 组件 */}
+            <ThemedText style={styles.title}>设置月度预算</ThemedText>
+            <TextInput
+              style={styles.input}
+              placeholder="请输入预算金额"
+              value={inputBudget}
+              onChangeText={setInputBudget}
+              keyboardType="numeric"
+            />
+            <TouchableOpacity onPress={saveBudget} style={styles.saveButton}>
+              <ThemedText style={styles.saveButtonText}>保存预算</ThemedText>
             </TouchableOpacity>
-          </View>
-        </View>
+            
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <ThemedText style={styles.closeButtonText}>关闭</ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
       </Modal>
       
       {/* 保存成功提示模态框 */}
@@ -75,9 +97,9 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         <RNView style={styles.successContainer}>
           <RNView style={styles.successContent}>
             <Ionicons name="checkmark-circle" size={50} color="#4CAF50" />
-            <Text style={styles.successText}>预算设置成功！</Text>
+            <ThemedText style={styles.successText}>预算设置成功！</ThemedText>
             <TouchableOpacity onPress={closeSuccess} style={styles.successButton}>
-              <Text style={styles.successButtonText}>确定</Text>
+              <ThemedText style={styles.successButtonText}>确定</ThemedText>
             </TouchableOpacity>
           </RNView>
         </RNView>
@@ -103,12 +125,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5, // 安卓阴影
   },
+  // 标题样式
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  // 输入框样式
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  // 保存按钮样式
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 5,
+    padding: 12,
+    width: '100%',
+    marginBottom: 10,
+  },
+  // 保存按钮文本样式
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 16,
+  },
   // 关闭按钮样式
   closeButton: {
-    marginTop: 20,
     backgroundColor: '#2196F3',
     borderRadius: 5,
     padding: 10,
+    width: '100%',
   },
   // 关闭按钮文本样式
   closeButtonText: {

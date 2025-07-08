@@ -252,11 +252,11 @@ export default function OCRScreen() {
           disabled={isLoading || !apiConfigured}
         />
         <View style={{ height: 10 }} />
-        {/* <Button
-          title="🖼 从图库选择"
+        <Button
+          title="🖼 ギャラリーから選ぶ"
           onPress={pickImage}
           disabled={isLoading || !apiConfigured}
-        /> */}
+        />
       </View>
       
       {/* 加载状态指示器 */}
@@ -276,11 +276,11 @@ export default function OCRScreen() {
       )}
       
       {/* 显示OCR识别结果 */}
-      {/* {ocrText !== '' && (
+      {ocrText !== '' && (
         <View style={styles.textContainer}>
           <Text style={styles.resultText}>{ocrText}</Text>
         </View>
-      )} */}
+      )}
 
       {items.length > 0 && (
         <View style={styles.textContainer}>

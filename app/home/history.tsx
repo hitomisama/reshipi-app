@@ -1,18 +1,28 @@
 // history.tsx
 import React from 'react';
-import { ScrollView, Image } from 'react-native';
+import { ScrollView, Image, TouchableOpacity } from 'react-native';
 import { ThemedView, ThemedText } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function HistoryScreen() {
   const expenses = useBudgetStore((state) => state.expenses);
 
   return (
     <ThemedView style={{ flex: 1, padding: 16 }}>
-      <ThemedText style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
+      {/* 返回按钮 */}
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}
+        onPress={() => router.push('/')}
+      >
+        <Ionicons name="arrow-back" size={28} color="#333" />
+      </TouchableOpacity>
+
+      <ThemedText style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' }}>
         支出履歴
       </ThemedText>
-      <ScrollView>
+      <ScrollView style={{ marginTop: 16 }}>
         {expenses.length === 0 && (
           <ThemedText style={{ color: '#888', textAlign: 'center', marginTop: 40 }}>
             履歴がありません

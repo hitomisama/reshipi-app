@@ -22,11 +22,24 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
   // 保存预算的函数
   const saveBudget = () => {
     const budgetValue = parseFloat(inputBudget);
-    if (!isNaN(budgetValue) && budgetValue > 0) {
+    if (!isNaN(budgetValue)) { // 允许负数
       setBudget(budgetValue);
       setInputBudget('');
       onClose(); // 关闭输入模态框
       if (onSuccess) onSuccess('予算が正常に設定されました！'); // 只调用回调
+      // 跳转到支出履历页面
+      if (typeof window !== 'undefined') {
+        // Web
+        window.setTimeout(() => {
+          window.location.hash = '#/home/history';
+        }, 300);
+      } else {
+        // 移动端
+        setTimeout(() => {
+          // @ts-ignore
+          if (typeof router !== 'undefined') router.push('/home/history');
+        }, 300);
+      }
     }
   };
 

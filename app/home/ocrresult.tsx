@@ -18,7 +18,12 @@ async function getLocalUriFromPhUri(phUri: string) {
     const assetId = phUri.replace('ph://', '').split('/')[0];
     try {
       const asset = await MediaLibrary.getAssetInfoAsync(assetId);
-      return asset.localUri || asset.uri;
+      // 只返回本地 file:// 路径
+      if (asset.localUri && asset.localUri.startsWith('file://')) {
+        return asset.localUri;
+      }
+      // asset.uri 可能是 assets-library:// 或其它协议，不能直接用
+      return null;
     } catch (e) {
       console.warn('无法转换 ph:// uri', e);
       return null;
@@ -47,7 +52,11 @@ export default function OCRResultScreen() {
     async function handleImage() {
       if (params.image) {
         const realUri = await getLocalUriFromPhUri(params.image as string);
-        setImage(realUri);
+        if (realUri) {
+          setImage(realUri);
+        } else {
+          setImage(null);
+        }
       }
       
       if (params.items) {
@@ -92,7 +101,7 @@ export default function OCRResultScreen() {
     try {
       // 检查预算是否足够
       if (budget < total) {
-        Alert.alert('警告', `预算不足！当前预算 ${budget}¥，消费金额 ${total}¥`);
+        Alert.alert('警告', `予算が足りません！現在の予算 ${budget}¥、消費金額 ${total}¥`);
         return;
       }
       
@@ -100,12 +109,12 @@ export default function OCRResultScreen() {
       const newBudget = budget - total;
       setBudget(newBudget);
       
-      Alert.alert('成功', `收据已保存！消费 ${total}¥，剩余预算 ${newBudget}¥`, [
-        { text: '确定', onPress: () => router.push('/') }
+      Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`, [
+        { text: '確認', onPress: () => router.push('/') }
       ]);
     } catch (error) {
       console.error('保存失败:', error);
-      Alert.alert('错误', '保存失败，请重试');
+      Alert.alert('エラー', '保存に失敗しました。もう一度お試しください');
     }
   };
 

@@ -10,6 +10,8 @@ import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { useBudgetStore } from '@/app/store/budgetStore';
+import { v4 as uuidv4 } from 'uuid';
+import 'react-native-get-random-values';
 import * as MediaLibrary from 'expo-media-library';
 
 // 工具函数：将 ph:// URI 转换为本地可用 URI
@@ -45,8 +47,9 @@ export default function OCRResultScreen() {
   const [image, setImage] = useState<string | null>(null);
   
   // 获取预算store函数
-  const setBudget = useBudgetStore((state) => state.setBudget);
+  const addExpense = useBudgetStore((state) => state.addExpense);
   const budget = useBudgetStore((state) => state.budget);
+  const setBudget = useBudgetStore((state) => state.setBudget);
   
   useEffect(() => {
     async function handleImage() {
@@ -98,24 +101,23 @@ export default function OCRResultScreen() {
   
   // 保存结果到预算中
   const saveResults = () => {
-    try {
-      // 检查预算是否足够
-      if (budget < total) {
-        Alert.alert('警告', `予算が足りません！現在の予算 ${budget}¥、消費金額 ${total}¥`);
-        return;
-      }
-      
-      // 从预算中扣除消费金额
-      const newBudget = budget - total;
-      setBudget(newBudget);
-      
-      Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`, [
-        { text: '確認', onPress: () => router.push('/') }
-      ]);
-    } catch (error) {
-      console.error('保存失败:', error);
-      Alert.alert('エラー', '保存に失敗しました。もう一度お試しください');
+    if (budget < total) {
+      Alert.alert('警告', `予算が足りません！現在の予算 ${budget}¥、消費金額 ${total}¥`);
+      return;
     }
+    const newBudget = budget - total;
+    setBudget(newBudget);
+
+    addExpense({
+      id: uuidv4(),
+      date: new Date().toISOString(),
+      items: results,
+      total,
+    });
+
+    Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`, [
+      { text: '確認', onPress: () => router.push('/') }
+    ]);
   };
 
   // 在 return 语句中，将所有组件改为使用 ThemedView 和 ThemedText

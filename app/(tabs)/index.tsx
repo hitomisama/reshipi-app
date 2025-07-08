@@ -54,6 +54,11 @@ export default function TabOneScreen() {
         <Ionicons name="camera" size={28} color="white" />
         <ThemedText style={styles.cameraButtonText}>レシートをスキャン</ThemedText>
       </TouchableOpacity>
+
+      {/* 支出履歴按钮 */}
+      <TouchableOpacity onPress={() => router.push('/home/history')}>
+        <ThemedText style={{ color: '#2196F3', marginTop: 20 }}>支出履歴を見る</ThemedText>
+      </TouchableOpacity>
       
       {/* 预算设置模态框组件 */}
       <BudgetSettingModal

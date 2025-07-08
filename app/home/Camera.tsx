@@ -197,12 +197,31 @@ export default function CameraScreen() {
     }
   };
 
+  // Web端：页面加载时自动弹出图片选择
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      pickImage();
+    }
+  }, []);
+
   // 处理权限问题
   if (hasPermission === null) {
     return <ThemedView style={styles.container}><ThemedText>カメラの権限をリクエストしています...</ThemedText></ThemedView>;
   }
   if (hasPermission === false) {
     return <ThemedView style={styles.container}><ThemedText>カメラへのアクセスが許可されていません。設定で許可してください。</ThemedText></ThemedView>;
+  }
+
+  if (Platform.OS === 'web') {
+    return (
+      <ThemedView style={styles.container}>
+        <TouchableOpacity onPress={pickImage} style={{ marginTop: 40 }}>
+          <ThemedText style={{ fontSize: 18, color: '#2196F3' }}>
+            画像を選択
+          </ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    );
   }
 
   return (

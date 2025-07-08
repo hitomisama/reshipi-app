@@ -1,6 +1,5 @@
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from '@/components/Themed';
+import { Modal, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import HomeContent from './BudgetInputSection';
 
 interface ResultMessage {

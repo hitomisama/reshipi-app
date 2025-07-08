@@ -68,20 +68,20 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         <ThemedView style={styles.modalContainer}>
           <ThemedView style={styles.modalContent}>
             {/* 临时替换 HomeContent 组件 */}
-            <ThemedText style={styles.title}>设置月度预算</ThemedText>
+            <ThemedText style={styles.title}>月間予算を設定</ThemedText>
             <TextInput
               style={styles.input}
-              placeholder="请输入预算金额"
+              placeholder="予算金額を入力してください"
               value={inputBudget}
               onChangeText={setInputBudget}
               keyboardType="numeric"
             />
             <TouchableOpacity onPress={saveBudget} style={styles.saveButton}>
-              <ThemedText style={styles.saveButtonText}>保存预算</ThemedText>
+              <ThemedText style={styles.saveButtonText}>予算を保存</ThemedText>
             </TouchableOpacity>
-            
+
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <ThemedText style={styles.closeButtonText}>关闭</ThemedText>
+              <ThemedText style={styles.closeButtonText}>閉じる</ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>
@@ -97,9 +97,9 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         <RNView style={styles.successContainer}>
           <RNView style={styles.successContent}>
             <Ionicons name="checkmark-circle" size={50} color="#4CAF50" />
-            <ThemedText style={styles.successText}>预算设置成功！</ThemedText>
+            <ThemedText style={styles.successText}>予算が正常に設定されました！</ThemedText>
             <TouchableOpacity onPress={closeSuccess} style={styles.successButton}>
-              <ThemedText style={styles.successButtonText}>确定</ThemedText>
+              <ThemedText style={styles.successButtonText}>確認</ThemedText>
             </TouchableOpacity>
           </RNView>
         </RNView>

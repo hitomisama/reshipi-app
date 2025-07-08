@@ -150,10 +150,10 @@ export default function CameraScreen() {
             }
           });
         } else {
-          Alert.alert('错误', '未获取到图片base64数据');
+          Alert.alert('エラー', '画像のbase64データが取得できませんでした');
         }
       } catch (error) {
-        Alert.alert('错误', '拍照或识别失败，请重试');
+        Alert.alert('エラー', '写真撮影または認識に失敗しました。もう一度お試しください');
       } finally {
         setIsProcessing(false);
       }
@@ -186,12 +186,12 @@ export default function CameraScreen() {
             }
           });
         } else {
-          Alert.alert('错误', '未获取到图片base64数据');
+          Alert.alert('エラー', '画像のbase64データが取得できませんでした');
         }
       }
     } catch (error) {
       console.error('选择图片或识别失败:', error);
-      Alert.alert('错误', '选择图片或识别失败');
+      Alert.alert('エラー', '画像の選択または認識に失敗しました');
     } finally {
       setIsProcessing(false);
     }
@@ -199,10 +199,10 @@ export default function CameraScreen() {
 
   // 处理权限问题
   if (hasPermission === null) {
-    return <ThemedView style={styles.container}><ThemedText>请求相机权限...</ThemedText></ThemedView>;
+    return <ThemedView style={styles.container}><ThemedText>カメラの権限をリクエストしています...</ThemedText></ThemedView>;
   }
   if (hasPermission === false) {
-    return <ThemedView style={styles.container}><ThemedText>没有相机权限，请在设置中允许访问</ThemedText></ThemedView>;
+    return <ThemedView style={styles.container}><ThemedText>カメラへのアクセスが許可されていません。設定で許可してください。</ThemedText></ThemedView>;
   }
 
   return (
@@ -210,7 +210,7 @@ export default function CameraScreen() {
       {/* 导航栏配置 */}
       <Stack.Screen 
         options={{
-          title: '扫描收据',
+          title: 'レシートをスキャン',
           headerLeft: () => (
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} color="#2196F3" />
@@ -267,13 +267,13 @@ export default function CameraScreen() {
           
           {/* 提示文本 */}
           <ThemedText style={styles.instructionText}>
-            拍摄收据或从相册选择图片
+            レシートを撮影するか、アルバムから選択してください
           </ThemedText>
         </>
       ) : (
         <RNView style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
-          <ThemedText style={styles.loadingText}>正在处理图像...</ThemedText>
+          <ThemedText style={styles.loadingText}>画像を処理中...</ThemedText>
         </RNView>
       )}
     </ThemedView>

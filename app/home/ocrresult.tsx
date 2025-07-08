@@ -114,7 +114,7 @@ export default function OCRResultScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen 
         options={{
-          title: '扫描结果',
+          title: 'スキャン結果',
           headerLeft: () => (
             <TouchableOpacity 
               style={styles.backButton} 
@@ -145,13 +145,13 @@ export default function OCRResultScreen() {
         {!image && (
           <ThemedView style={styles.placeholderImage}>
             <Ionicons name="image-outline" size={50} color="#ccc" />
-            <ThemedText style={styles.placeholderText}>图片加载失败</ThemedText>
+            <ThemedText style={styles.placeholderText}>画像の読み込みに失敗しました</ThemedText>
           </ThemedView>
         )}
         
         {/* OCR结果 */}
         <ThemedView style={styles.resultsContainer}>
-          <ThemedText style={styles.resultsTitle}>识别结果</ThemedText>
+          <ThemedText style={styles.resultsTitle}>認識結果</ThemedText>
           
           {results.length > 0 ? (
             <ThemedView style={styles.itemsContainer}>
@@ -164,7 +164,7 @@ export default function OCRResultScreen() {
               
               {/* 总价 */}
               <ThemedView style={styles.totalRow}>
-                <ThemedText style={styles.totalLabel}>总计</ThemedText>
+                <ThemedText style={styles.totalLabel}>合計</ThemedText>
                 <ThemedText style={styles.totalPrice}>{total}¥</ThemedText>
               </ThemedView>
 
@@ -174,21 +174,21 @@ export default function OCRResultScreen() {
                   style={styles.secondaryButton}
                   onPress={() => router.back()}
                 >
-                  <ThemedText style={styles.secondaryButtonText}>重新扫描</ThemedText>
+                  <ThemedText style={styles.secondaryButtonText}>再スキャン</ThemedText>
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
                   style={styles.saveButton}
                   onPress={saveResults}
                 >
-                  <ThemedText style={styles.saveButtonText}>保存到预算</ThemedText>
+                  <ThemedText style={styles.saveButtonText}>予算に保存</ThemedText>
                 </TouchableOpacity>
               </ThemedView>
             </ThemedView>
           ) : (
             <ThemedView style={styles.noResultsContainer}>
               <ThemedText style={styles.noResultsText}>
-                未能识别到商品信息，请重新扫描
+                商品情報が認識できませんでした。再度スキャンしてください
               </ThemedText>
             </ThemedView>
           )}

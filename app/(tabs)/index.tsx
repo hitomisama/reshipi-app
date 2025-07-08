@@ -30,11 +30,11 @@ export default function TabOneScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText>预算{budget}日元</ThemedText>
+      <ThemedText>予算：{budget}円</ThemedText>
       
       {/* 点击文本打开模态框 */}
       <TouchableOpacity onPress={openModal}>
-        <ThemedText style={styles.modalTrigger}>设置预算</ThemedText>
+        <ThemedText style={styles.modalTrigger}>予算を設定</ThemedText>
       </TouchableOpacity>
       
       {/* 相机按钮 */}
@@ -43,7 +43,7 @@ export default function TabOneScreen() {
         onPress={navigateToCamera}
       >
         <Ionicons name="camera" size={28} color="white" />
-        <ThemedText style={styles.cameraButtonText}>扫描收据</ThemedText>
+        <ThemedText style={styles.cameraButtonText}>レシートをスキャン</ThemedText>
       </TouchableOpacity>
       
       {/* 预算设置模态框组件 */}
@@ -51,7 +51,6 @@ export default function TabOneScreen() {
         visible={modalVisible}
         onClose={closeModal}
       />
-      
     </ThemedView>
   );
 }

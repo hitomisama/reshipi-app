@@ -15,6 +15,7 @@ import Constants from 'expo-constants';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ----------- OCR 识别工具函数 -----------
 async function ocrImageBase64(base64: string) {
@@ -142,6 +143,7 @@ export default function CameraScreen() {
         // OCR识别
         if (photo.base64) {
           const ocrResult = await ocrImageBase64(photo.base64);
+          await saveItemsToStorage(ocrResult.items); // 新增：保存到本地
           router.push({
             pathname: '/home/ocrresult',
             params: { 
@@ -166,7 +168,7 @@ export default function CameraScreen() {
       setIsProcessing(true);
       
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -178,6 +180,7 @@ export default function CameraScreen() {
         const imageUri = selectedImage.uri;
         if (selectedImage.base64) {
           const ocrResult = await ocrImageBase64(selectedImage.base64);
+          await saveItemsToStorage(ocrResult.items); // 新增：保存到本地
           router.push({
             pathname: '/home/ocrresult',
             params: { 
@@ -194,6 +197,20 @@ export default function CameraScreen() {
       Alert.alert('エラー', '画像の選択または認識に失敗しました');
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // 保存识别结果到本地
+  const saveItemsToStorage = async (items: any[]) => {
+    try {
+      // 读取旧的历史
+      const json = await AsyncStorage.getItem('ocr_items');
+      const oldItems = json ? JSON.parse(json) : [];
+      // 新的历史在最前面
+      const newItems = [{ items, date: Date.now() }, ...oldItems];
+      await AsyncStorage.setItem('ocr_items', JSON.stringify(newItems));
+    } catch (e) {
+      console.log('保存失败', e);
     }
   };
 

@@ -136,9 +136,9 @@ export default function OCRResultScreen() {
 
     // 无论弹窗如何，保存后直接跳转到 history 页面
     if (Platform.OS === 'web') {
-      setTimeout(() => router.push('/home/history'), 100);
+      setTimeout(() => router.push('/history'), 100);
     } else {
-      setTimeout(() => router.push('/home/history'), 500); // 给弹窗一点时间
+      setTimeout(() => router.push('/history'), 500); // 给弹窗一点时间
     }
   };
 
@@ -231,17 +231,21 @@ export default function OCRResultScreen() {
                   setResults(newResults);
                 }}
               />
-              <TouchableOpacity
-                style={[styles.tableCell, styles.categoryCell]}
-                onPress={() => showCategoryPicker(item.category || '他', value => {
+              {/* 分类下拉选择 */}
+              <Picker
+                selectedValue={item.category || '他'}
+                style={[styles.tableCell, {paddingLeft: 0, paddingRight: 0}]}
+                onValueChange={(value) => {
                   const newResults = [...results];
                   newResults[index].category = value;
                   setResults(newResults);
-                })}
-                activeOpacity={0.7}
+                }}
+                dropdownIconColor="#2196F3"
               >
-                <ThemedText style={styles.categoryCellText}>{item.category || '他'}</ThemedText>
-              </TouchableOpacity>
+                {CATEGORY_OPTIONS.map((option) => (
+                  <Picker.Item key={option} label={option} value={option} />
+                ))}
+              </Picker>
               <TextInput
                 style={styles.tableCell}
                 value={item.price.toString()}

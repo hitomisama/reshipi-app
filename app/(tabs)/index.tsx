@@ -55,9 +55,13 @@ export default function TabOneScreen() {
         <ThemedText style={styles.cameraButtonText}>レシートをスキャン</ThemedText>
       </TouchableOpacity>
 
-      {/* 支出履歴按钮 */}
-      <TouchableOpacity onPress={() => router.push('/home/history')}>
-        <ThemedText style={{ color: '#2196F3', marginTop: 20 }}>支出履歴を見る</ThemedText>
+      {/* 手动输入按钮 */}
+      <TouchableOpacity 
+        style={styles.manualButton}
+        onPress={() => router.push('/home/manualinput')}
+      >
+        <Ionicons name="create-outline" size={28} color="white" />
+        <ThemedText style={styles.manualButtonText}>手動入力</ThemedText>
       </TouchableOpacity>
       
       {/* 预算设置模态框组件 */}
@@ -130,6 +134,24 @@ const styles = StyleSheet.create({
   },
   // 相机按钮文本样式
   cameraButtonText: {
+    marginLeft: 8,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  // 手动输入按钮样式
+  manualButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2196F3',
+    borderRadius: 50,
+    padding: 15,
+    paddingHorizontal: 25,
+    marginVertical: 10,
+    elevation: 4, // 安卓阴影
+  },
+  // 手动输入按钮文本样式
+  manualButtonText: {
     marginLeft: 8,
     color: 'white',
     fontWeight: 'bold',

@@ -31,13 +31,13 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
       if (typeof window !== 'undefined') {
         // Web
         window.setTimeout(() => {
-          window.location.hash = '#/home/history';
+          window.location.hash = '#/history';
         }, 300);
       } else {
         // 移动端
         setTimeout(() => {
           // @ts-ignore
-          if (typeof router !== 'undefined') router.push('/home/history');
+          if (typeof router !== 'undefined') router.push('/history');
         }, 300);
       }
     }

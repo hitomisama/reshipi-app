@@ -209,7 +209,7 @@ export default function OCRResultScreen() {
               style={styles.infoInput}
               value={shop}
               onChangeText={setShop}
-              placeholder="西友"
+              placeholder="コンビニ名"
             />
           </ThemedView>
         </ThemedView>
@@ -231,21 +231,19 @@ export default function OCRResultScreen() {
                   setResults(newResults);
                 }}
               />
-              {/* 分类下拉选择 */}
-              <Picker
-                selectedValue={item.category || '他'}
-                style={[styles.tableCell, {paddingLeft: 0, paddingRight: 0}]}
-                onValueChange={(value) => {
+              {/* 分类选择：点击文本弹窗选择 */}
+              <TouchableOpacity
+                style={[styles.tableCell, styles.categoryCell]}
+                onPress={() => showCategoryPicker(item.category || '他', (value) => {
                   const newResults = [...results];
                   newResults[index].category = value;
                   setResults(newResults);
-                }}
-                dropdownIconColor="#2196F3"
+                })}
               >
-                {CATEGORY_OPTIONS.map((option) => (
-                  <Picker.Item key={option} label={option} value={option} />
-                ))}
-              </Picker>
+                <ThemedText style={styles.categoryCellText}>
+                  {item.category || '他'}
+                </ThemedText>
+              </TouchableOpacity>
               <TextInput
                 style={styles.tableCell}
                 value={item.price.toString()}

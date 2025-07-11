@@ -53,7 +53,7 @@ export default function TabLayout() {
       />
       {/* 第二个标签页，改为历史记录 */}
       <Tabs.Screen
-        name="../home/history" // 指向历史记录页面
+        name="history" // 指向历史记录页面
         options={{
           title: '履历', // 标签标题
           tabBarIcon: ({ color }) => <TabBarIcon name="history" color={color} />, // 使用历史图标

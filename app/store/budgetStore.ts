@@ -21,7 +21,7 @@ type BudgetState = {
 };
 
 export const useBudgetStore = create<BudgetState>((set) => ({
-  budget: 0,
+  budget: 30000, // 默认预算设置为30000
   setBudget: (amount) => set({ budget: amount }),
   expenses: [],
   addExpense: (record) => set((state) => ({ expenses: [record, ...state.expenses] })),

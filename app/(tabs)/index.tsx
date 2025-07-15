@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
 import BudgetSettingModal from '../home/BudgetSettingModal';
+import BudgetBar from '../home/BudgetBar';
 
 
 export default function TabOneScreen() {
@@ -46,6 +47,10 @@ export default function TabOneScreen() {
         <ThemedText style={styles.modalTrigger}>予算を設定</ThemedText>
       </TouchableOpacity>
       
+      <ThemedView style={{ marginVertical: 20 }}>
+        <BudgetBar />
+      </ThemedView>
+
       {/* 相机按钮 */}
       <TouchableOpacity 
         style={styles.cameraButton}

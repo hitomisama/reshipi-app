@@ -111,9 +111,14 @@ export default function OCRResultScreen() {
         setResults(exampleResults);
         setTotal(exampleResults.reduce((sum, item) => sum + item.price, 0));
       }
+
+      // 新增逻辑：如果从 manualinput 跳转过来，设置商店名
+      if (params.shop) {
+        setShop(params.shop as string);
+      }
     }
     handleImage();
-  }, [params.image, params.items]);
+  }, [params.image, params.items, params.shop]);
   
   // 保存结果到预算中
   const saveResults = () => {

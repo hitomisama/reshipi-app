@@ -88,14 +88,15 @@ export default function ManualInputScreen() {
     // 转换数据格式
     const formattedItems = validItems.map(item => ({
       item: item.item.trim(),
-      price: parseInt(item.price)
+      price: parseInt(item.price),
+      category: item.category,
     }));
 
     try {
       // 保存到本地存储
       await saveItemsToStorage(formattedItems, shop);
-      
-      // 跳转到结果页面
+
+      // 跳转到结果页面，并同步商店名
       router.push({
         pathname: '/home/ocrresult',
         params: { 

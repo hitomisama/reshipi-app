@@ -111,12 +111,31 @@ export default function HistoryScreen() {
                   elevation: 1,
                 }}
               >
-                <ThemedText style={{ fontSize: 16, fontWeight: 'bold', color: '#4A4A4A', flex: 1, letterSpacing: 2 }}>
-                  {item.shop || (item.items && item.items[0]?.item) || item.item || '—'}
-                </ThemedText>
+                <TouchableOpacity
+                  style={{ flex: 1 }}
+                  onPress={() => {
+                    // 查看详细记录逻辑
+                    alert(JSON.stringify(item, null, 2));
+                  }}
+                >
+                  <ThemedText style={{ fontSize: 16, fontWeight: 'bold', color: '#4A4A4A', flex: 1, letterSpacing: 2 }}>
+                    {item.shop || (item.items && item.items[0]?.item) || item.item || '—'}
+                  </ThemedText>
+                </TouchableOpacity>
                 <ThemedText style={{ fontSize: 18, color: '#C2185B', fontWeight: 'bold', minWidth: 70, textAlign: 'right', fontFamily: 'monospace' }}>
                   {item.total ? item.total : (item.items ? item.items.reduce((s: number, it: any) => s + (it.price || 0), 0) : item.price)}円
                 </ThemedText>
+                <TouchableOpacity
+                  onPress={async () => {
+                    // 删除记录逻辑
+                    const updatedItems = items.filter((_, i) => i !== idx);
+                    setItems(updatedItems);
+                    await AsyncStorage.setItem('ocr_items', JSON.stringify(updatedItems));
+                  }}
+                  style={{ marginLeft: 10 }}
+                >
+                  <Ionicons name="trash" size={22} color="red" />
+                </TouchableOpacity>
               </View>
             ))}
           </View>

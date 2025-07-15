@@ -115,7 +115,8 @@ export default function HistoryScreen() {
                   style={{ flex: 1 }}
                   onPress={() => {
                     // 查看详细记录逻辑
-                    alert(JSON.stringify(item, null, 2));
+                    const details = `日付: ${new Date(item.date).toLocaleDateString()}\n商品名: ${item.shop || (item.items && item.items[0]?.item) || item.item || '—'}\n金額: ${item.total ? item.total : (item.items ? item.items.reduce((s: number, it: any) => s + (it.price || 0), 0) : item.price)}円`;
+                    alert(details);
                   }}
                 >
                   <ThemedText style={{ fontSize: 16, fontWeight: 'bold', color: '#4A4A4A', flex: 1, letterSpacing: 2 }}>

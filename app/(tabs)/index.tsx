@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, Modal, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,6 +11,8 @@ import BudgetSettingModal from '../home/BudgetSettingModal';
 export default function TabOneScreen() {
   // 管理模态框显示状态的状态变量
   const [modalVisible, setModalVisible] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
   const budget = useBudgetStore((state) => state.budget);
 
   // 打开模态框的函数
@@ -22,8 +24,15 @@ export default function TabOneScreen() {
   const closeModal = () => {
     setModalVisible(false);
   };
-  
-  // 导航到相机屏幕的函数
+
+  // 预算设置成功回调
+  const handleSuccess = (msg = '予算が正常に設定されました！') => {
+    setModalVisible(false);
+    setSuccessMsg(msg);
+    setSuccessVisible(true);
+  };
+
+  // 跳转到相机的函数
   const navigateToCamera = () => {
     router.push('/home/Camera');
   };
@@ -45,12 +54,46 @@ export default function TabOneScreen() {
         <Ionicons name="camera" size={28} color="white" />
         <ThemedText style={styles.cameraButtonText}>レシートをスキャン</ThemedText>
       </TouchableOpacity>
+
+      {/* 手动输入按钮 */}
+      <TouchableOpacity 
+        style={styles.manualButton}
+        onPress={() => router.push('/home/manualinput')}
+      >
+        <Ionicons name="create-outline" size={28} color="white" />
+        <ThemedText style={styles.manualButtonText}>手動入力</ThemedText>
+      </TouchableOpacity>
       
       {/* 预算设置模态框组件 */}
       <BudgetSettingModal
         visible={modalVisible}
         onClose={closeModal}
+        onSuccess={handleSuccess} // 新增：设置成功时回调
       />
+
+      {/* 保存成功提示弹窗 */}
+      <Modal
+        visible={successVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSuccessVisible(false)}
+      >
+        <View style={{
+          flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)'
+        }}>
+          <View style={{
+            backgroundColor: 'white', borderRadius: 10, padding: 30, alignItems: 'center'
+          }}>
+            <ThemedText style={{ fontSize: 18, color: '#4CAF50', marginBottom: 20 }}>{successMsg}</ThemedText>
+            <TouchableOpacity
+              style={{ backgroundColor: '#4CAF50', borderRadius: 5, paddingVertical: 8, paddingHorizontal: 30 }}
+              onPress={() => setSuccessVisible(false)}
+            >
+              <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>確認</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -91,6 +134,24 @@ const styles = StyleSheet.create({
   },
   // 相机按钮文本样式
   cameraButtonText: {
+    marginLeft: 8,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  // 手动输入按钮样式
+  manualButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2196F3',
+    borderRadius: 50,
+    padding: 15,
+    paddingHorizontal: 25,
+    marginVertical: 10,
+    elevation: 4, // 安卓阴影
+  },
+  // 手动输入按钮文本样式
+  manualButtonText: {
     marginLeft: 8,
     color: 'white',
     fontWeight: 'bold',

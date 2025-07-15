@@ -4,13 +4,20 @@ import {
   Image, 
   ScrollView, 
   TouchableOpacity, 
-  Alert
+  Alert,
+  View,
+  TextInput,
+  ActionSheetIOS,
+  Platform
 } from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { useBudgetStore } from '@/app/store/budgetStore';
+import { v4 as uuidv4 } from 'uuid';
+import 'react-native-get-random-values';
 import * as MediaLibrary from 'expo-media-library';
+import { Picker } from '@react-native-picker/picker';
 
 // 工具函数：将 ph:// URI 转换为本地可用 URI
 async function getLocalUriFromPhUri(phUri: string) {
@@ -18,7 +25,12 @@ async function getLocalUriFromPhUri(phUri: string) {
     const assetId = phUri.replace('ph://', '').split('/')[0];
     try {
       const asset = await MediaLibrary.getAssetInfoAsync(assetId);
-      return asset.localUri || asset.uri;
+      // 只返回本地 file:// 路径
+      if (asset.localUri && asset.localUri.startsWith('file://')) {
+        return asset.localUri;
+      }
+      // asset.uri 可能是 assets-library:// 或其它协议，不能直接用
+      return null;
     } catch (e) {
       console.warn('无法转换 ph:// uri', e);
       return null;
@@ -31,43 +43,61 @@ async function getLocalUriFromPhUri(phUri: string) {
 interface OCRItem {
   item: string;
   price: number;
+  category?: string; // 新增
 }
+
+const CATEGORY_OPTIONS = [
+  '食材',
+  '飲み物',
+  'おやつ',
+  '外食',
+  '他',
+];
 
 export default function OCRResultScreen() {
   const params = useLocalSearchParams();
   const [results, setResults] = useState<OCRItem[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [image, setImage] = useState<string | null>(null);
-  
+  const [date, setDate] = useState<string>(() => {
+    // 默认今天日期 yyyy年MM月dd日
+    const d = new Date();
+    return `${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日`;
+  });
+  const [shop, setShop] = useState<string>('');
+
   // 获取预算store函数
-  const setBudget = useBudgetStore((state) => state.setBudget);
+  const addExpense = useBudgetStore((state) => state.addExpense);
   const budget = useBudgetStore((state) => state.budget);
+  const setBudget = useBudgetStore((state) => state.setBudget);
   
   useEffect(() => {
     async function handleImage() {
       if (params.image) {
         const realUri = await getLocalUriFromPhUri(params.image as string);
-        setImage(realUri);
+        if (realUri) {
+          setImage(realUri);
+        } else {
+          setImage(null);
+        }
       }
       
       if (params.items) {
         try {
-          // 处理 params.items 可能是字符串或字符串数组的情况
           const itemsData = Array.isArray(params.items) ? params.items[0] : params.items;
-          const parsedItems: OCRItem[] = JSON.parse(itemsData as string);
+          const parsedItems: OCRItem[] = JSON.parse(itemsData as string).map((item: OCRItem) => ({
+            ...item,
+            category: '他',
+          }));
           setResults(parsedItems);
-          
-          // 计算总价
           const sum = parsedItems.reduce((acc, item) => acc + item.price, 0);
           setTotal(sum);
         } catch (error) {
           console.error('解析商品数据失败', error);
           // 使用硬编码数据作为后备
           const fallbackResults: OCRItem[] = [
-            { item: "咖啡", price: 380 },
-            { item: "三明治", price: 500 },
-            { item: "矿泉水", price: 120 },
-            { item: "税", price: 100 }
+            { item: "牛丼", price: 610, category: '外食' },
+            { item: "タバコ", price: 610, category: '他' }
           ];
           setResults(fallbackResults);
           setTotal(fallbackResults.reduce((sum, item) => sum + item.price, 0));
@@ -75,10 +105,8 @@ export default function OCRResultScreen() {
       } else {
         // 如果没有传递数据，使用示例数据
         const exampleResults: OCRItem[] = [
-          { item: "咖啡", price: 380 },
-          { item: "三明治", price: 500 },
-          { item: "矿泉水", price: 120 },
-          { item: "税", price: 100 }
+          { item: "牛丼", price: 610, category: '外食' },
+          { item: "タバコ", price: 610, category: '他' }
         ];
         setResults(exampleResults);
         setTotal(exampleResults.reduce((sum, item) => sum + item.price, 0));
@@ -89,32 +117,66 @@ export default function OCRResultScreen() {
   
   // 保存结果到预算中
   const saveResults = () => {
-    try {
-      // 检查预算是否足够
-      if (budget < total) {
-        Alert.alert('警告', `预算不足！当前预算 ${budget}¥，消费金额 ${total}¥`);
-        return;
-      }
-      
-      // 从预算中扣除消费金额
-      const newBudget = budget - total;
-      setBudget(newBudget);
-      
-      Alert.alert('成功', `收据已保存！消费 ${total}¥，剩余预算 ${newBudget}¥`, [
-        { text: '确定', onPress: () => router.push('/') }
-      ]);
-    } catch (error) {
-      console.error('保存失败:', error);
-      Alert.alert('错误', '保存失败，请重试');
+    const newBudget = budget - total;
+    setBudget(newBudget);
+
+    addExpense({
+      id: uuidv4(),
+      date: new Date().toISOString(),
+      items: results,
+      total,
+    });
+
+    if (budget < total) {
+      const exceed = total - budget;
+      Alert.alert('警告', `予算を${exceed}円超えています`);
+    } else {
+      Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`);
+    }
+
+    // 无论弹窗如何，保存后直接跳转到 history 页面
+    if (Platform.OS === 'web') {
+      setTimeout(() => router.push('/history'), 100);
+    } else {
+      setTimeout(() => router.push('/history'), 500); // 给弹窗一点时间
     }
   };
 
+  function showCategoryPicker(current: string, onSelect: (value: string) => void) {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions({
+        options: [...CATEGORY_OPTIONS, 'キャンセル'],
+        cancelButtonIndex: CATEGORY_OPTIONS.length,
+        title: '項目を選択',
+      }, (buttonIndex) => {
+        if (buttonIndex < CATEGORY_OPTIONS.length) {
+          onSelect(CATEGORY_OPTIONS[buttonIndex]);
+        }
+      });
+    } else if (Platform.OS === 'web') {
+      const value = window.prompt('項目を入力/選択してください：' + CATEGORY_OPTIONS.join('、'), current);
+      if (value && CATEGORY_OPTIONS.includes(value)) {
+        onSelect(value);
+      }
+    } else {
+      // Android: 简单弹窗
+      Alert.alert(
+        '項目を選択',
+        '',
+        [
+          ...CATEGORY_OPTIONS.map(opt => ({ text: opt, onPress: () => onSelect(opt) })),
+          { text: 'キャンセル', style: 'cancel' as const }
+        ]
+      );
+    }
+  }
+
   // 在 return 语句中，将所有组件改为使用 ThemedView 和 ThemedText
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, {backgroundColor:'#FFFFF5'}]}>
       <Stack.Screen 
         options={{
-          title: 'スキャン結果',
+          title: 'レシート撮影画面',
           headerLeft: () => (
             <TouchableOpacity 
               style={styles.backButton} 
@@ -125,74 +187,84 @@ export default function OCRResultScreen() {
           ),
         }}
       />
-      
       <ScrollView style={styles.scrollContainer}>
-        {/* 扫描的图片 */}
-        {image && (
-          <Image 
-            source={{ uri: image }} 
-            style={styles.receiptImage}
-            resizeMode="contain"
-            onError={(error) => {
-              console.log('图片加载失败:', error);
-              setImage(null); // 清除无效的图片 URI
-            }}
-            onLoad={() => console.log('图片加载成功')}
-          />
-        )}
-
-        {/* 如果图片加载失败，显示占位符 */}
-        {!image && (
-          <ThemedView style={styles.placeholderImage}>
-            <Ionicons name="image-outline" size={50} color="#ccc" />
-            <ThemedText style={styles.placeholderText}>画像の読み込みに失敗しました</ThemedText>
+        {/* 合计/日期/店铺 */}
+        <ThemedView style={styles.infoSection}>
+          <ThemedView style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>合計</ThemedText>
+            <ThemedText style={styles.infoValue}>{total}円</ThemedText>
           </ThemedView>
-        )}
-        
-        {/* OCR结果 */}
-        <ThemedView style={styles.resultsContainer}>
-          <ThemedText style={styles.resultsTitle}>認識結果</ThemedText>
-          
-          {results.length > 0 ? (
-            <ThemedView style={styles.itemsContainer}>
-              {results.map((item, index) => (
-                <ThemedView key={index} style={styles.itemRow}>
-                  <ThemedText style={styles.itemName}>{item.item}</ThemedText>
-                  <ThemedText style={styles.itemPrice}>{item.price}¥</ThemedText>
-                </ThemedView>
-              ))}
-              
-              {/* 总价 */}
-              <ThemedView style={styles.totalRow}>
-                <ThemedText style={styles.totalLabel}>合計</ThemedText>
-                <ThemedText style={styles.totalPrice}>{total}¥</ThemedText>
-              </ThemedView>
-
-              {/* 操作按钮 */}
-              <ThemedView style={styles.buttonsContainer}>
-                <TouchableOpacity 
-                  style={styles.secondaryButton}
-                  onPress={() => router.back()}
-                >
-                  <ThemedText style={styles.secondaryButtonText}>再スキャン</ThemedText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={styles.saveButton}
-                  onPress={saveResults}
-                >
-                  <ThemedText style={styles.saveButtonText}>予算に保存</ThemedText>
-                </TouchableOpacity>
-              </ThemedView>
-            </ThemedView>
-          ) : (
-            <ThemedView style={styles.noResultsContainer}>
-              <ThemedText style={styles.noResultsText}>
-                商品情報が認識できませんでした。再度スキャンしてください
-              </ThemedText>
-            </ThemedView>
-          )}
+          <ThemedView style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>日付</ThemedText>
+            <TextInput
+              style={styles.infoInput}
+              value={date}
+              onChangeText={setDate}
+              placeholder="2025年05月02日"
+            />
+          </ThemedView>
+          <ThemedView style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>店舗</ThemedText>
+            <TextInput
+              style={styles.infoInput}
+              value={shop}
+              onChangeText={setShop}
+              placeholder="西友"
+            />
+          </ThemedView>
         </ThemedView>
+        {/* 商品表格 */}
+        <ThemedView style={styles.tableSection}>
+          <ThemedView style={styles.tableHeader}>
+            <ThemedText style={styles.tableHeaderCell}>商品</ThemedText>
+            <ThemedText style={styles.tableHeaderCell}>項目</ThemedText>
+            <ThemedText style={styles.tableHeaderCell}>金額</ThemedText>
+          </ThemedView>
+          {results.map((item, index) => (
+            <ThemedView key={index} style={styles.tableRow}>
+              <TextInput
+                style={styles.tableCell}
+                value={item.item}
+                onChangeText={text => {
+                  const newResults = [...results];
+                  newResults[index].item = text;
+                  setResults(newResults);
+                }}
+              />
+              {/* 分类下拉选择 */}
+              <Picker
+                selectedValue={item.category || '他'}
+                style={[styles.tableCell, {paddingLeft: 0, paddingRight: 0}]}
+                onValueChange={(value) => {
+                  const newResults = [...results];
+                  newResults[index].category = value;
+                  setResults(newResults);
+                }}
+                dropdownIconColor="#2196F3"
+              >
+                {CATEGORY_OPTIONS.map((option) => (
+                  <Picker.Item key={option} label={option} value={option} />
+                ))}
+              </Picker>
+              <TextInput
+                style={styles.tableCell}
+                value={item.price.toString()}
+                keyboardType="numeric"
+                onChangeText={text => {
+                  const newResults = [...results];
+                  newResults[index].price = parseInt(text) || 0;
+                  setResults(newResults);
+                  setTotal(newResults.reduce((acc, i) => acc + i.price, 0));
+                }}
+              />
+            </ThemedView>
+          ))}
+        </ThemedView>
+
+        {/* 登録按钮 */}
+        <TouchableOpacity style={styles.registerButton} onPress={saveResults}>
+          <ThemedText style={styles.registerButtonText}>登録</ThemedText>
+        </TouchableOpacity>
       </ScrollView>
     </ThemedView>
   );
@@ -311,6 +383,113 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  infoSection: {
+    backgroundColor: '#FFFFF5',
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoLabel: {
+    width: 50,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  infoValue: {
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  infoInput: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    fontSize: 16,
+    marginLeft: 10,
+    paddingVertical: 2,
+  },
+  tableSection: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    paddingBottom: 6,
+    marginBottom: 6,
+  },
+  tableHeaderCell: {
+    flex: 1,
+    fontWeight: 'bold',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  tableCell: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 5,
+    padding: 4,
+    fontSize: 15,
+    marginHorizontal: 2,
+    backgroundColor: '#FAFAFA',
+    textAlign: 'center',
+  },
+  categoryCell: {
+    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 6,
+    marginHorizontal: 2,
+  },
+  categoryCellText: {
+    fontSize: 15,
+    color: '#333',
+    textAlign: 'center',
+  },
+  categoryNoteBox: {
+    alignSelf: 'flex-end',
+    marginBottom: 10,
+    backgroundColor: 'transparent',
+    paddingRight: 10,
+  },
+  categoryNoteTitle: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  categoryNoteItem: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 1,
+  },
+  registerButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  registerButtonText: {
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

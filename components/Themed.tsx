@@ -52,7 +52,7 @@ export function ThemedText(props: ThemedTextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
-  return <RNText style={[{ color }, style]} {...otherProps} />;
+  return <RNText style={[{ color, fontFamily: 'azuki' }, style]} {...otherProps} />;
 }
 
 export function ThemedView(props: ThemedViewProps) {

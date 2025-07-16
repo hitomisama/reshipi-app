@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, Modal, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { useBudgetStore } from '@/app/store/budgetStore';
@@ -14,6 +15,7 @@ export default function TabOneScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const budget = useBudgetStore((state) => state.budget);
 
   // 打开模态框的函数
@@ -37,6 +39,14 @@ export default function TabOneScreen() {
   const navigateToCamera = () => {
     router.push('/home/Camera');
   };
+
+  useEffect(() => {
+    Font.loadAsync({
+      'azuki': require('@/assets/fonts/azuki.ttf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) return null; // 或显示 loading
 
   return (
     <ThemedView style={styles.container}>

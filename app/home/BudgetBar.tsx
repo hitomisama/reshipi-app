@@ -20,41 +20,49 @@ export default function BudgetBar() {
 
   // 根据百分比选择图像
   const getImageSource = () => {
-    if (remainingPercentage >= 50) {
-      return require("../../assets/images/full_pig.png"); // 满余量图像
+    if (remainingPercentage >= 75) {
+      return require("../../assets/images/full_pig.png"); // 充足
+    } else if (remainingPercentage >= 50) {
+      return require("../../assets/images/normal_pig.png"); // 正常
     } else if (remainingPercentage >= 20) {
-      return require("../../assets/images/normal_pig.png"); // 中余量图像
+      return require("../../assets/images/cry_pig.png"); // 较低
     } else {
-      return require("../../assets/images/Fainting_pig.png"); // 低余量图像
+      return require("../../assets/images/Fainting_pig.png"); // 极低
     }
   };
 
   // 根据百分比设置条形图颜色
-  const getBarColor = () => {
-    if (remainingPercentage >= 50) {
-      return "green"; // 高余量
-    } else if (remainingPercentage >= 20) {
-      return "orange"; // 中余量
-    } else {
-      return "red"; // 低余量
-    }
-  };
+  // const getBarColor = () => {
+  //   if (remainingPercentage >= 50) {
+  //     return "#7EC4A4"; // 高余量
+  //   } else if (remainingPercentage >= 20) {
+  //     return "orange"; // 中余量
+  //   } else {
+  //     return "red"; // 低余量
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>预算余量</Text>
-      <View style={styles.barContainer}>
-        <View
-          style={[
-            styles.bar,
-            {
-              height: `${remainingPercentage}%`,
-              backgroundColor: getBarColor(),
-            },
-          ]}
+      <View style={styles.imageWrapper}>
+        <Image
+          source={getImageSource()}
+          style={styles.image}
+          resizeMode="contain"
         />
+        <View style={styles.barContainer}>
+          <View
+            style={[
+              styles.bar,
+              {
+                height: `${remainingPercentage}%`,
+                backgroundColor: "#7EC4A4",
+              },
+            ]}
+          />
+        </View>
       </View>
-      <Image source={getImageSource()} style={styles.image} />
+      {/* <Text style={styles.title}>预算余量</Text> */}
     </View>
   );
 }
@@ -64,28 +72,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+  imageWrapper: {
+    position: "relative",
+    width: 120, // 可以适当加大
+    height: 120,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "250%",
+    height: "250%",
   },
   barContainer: {
-    width: 50,
-    height: 200,
+    position: "absolute",
+    top: 80,
+    left: 35, // 根据实际图片内容调整
+    width: 40,
+    height: 120,
     backgroundColor: "white",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ccc",
     overflow: "hidden",
     justifyContent: "flex-end",
+    alignItems: "center",
   },
   bar: {
     width: "100%",
     borderRadius: 10,
   },
-  image: {
-    width: 100,
-    height: 100,
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
     marginTop: 10,
   },
 });

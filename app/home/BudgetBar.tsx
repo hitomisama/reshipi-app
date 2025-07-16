@@ -70,7 +70,7 @@ export default function BudgetBar() {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 80,
   },
   imageWrapper: {
     position: "relative",

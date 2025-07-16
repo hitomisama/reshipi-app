@@ -117,10 +117,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // 内容靠上
+    paddingTop: 40,               // 顶部间距
   },
   title: {
-    fontSize: 20,
+    fontSize: 50,
     fontWeight: 'bold',
   },
   separator: {
@@ -130,7 +131,8 @@ const styles = StyleSheet.create({
   },
   // 模态框触发器样式
   modalTrigger: {
-    fontSize: 16,
+    marginTop: 20,
+    fontSize: 20,
     color: '#2196F3',
     padding: 10,
     marginVertical: 15,

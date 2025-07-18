@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, View } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import * as Font from 'expo-font';
+import React, { useState, useEffect } from "react";
+import { StyleSheet, TouchableOpacity, Modal, View } from "react-native";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import * as Font from "expo-font";
 
-import { ThemedText, ThemedView } from '@/components/Themed';
-import { useBudgetStore } from '@/app/store/budgetStore';
-import BudgetSettingModal from '../home/BudgetSettingModal';
-import BudgetBar from '../home/BudgetBar';
-
+import { ThemedText, ThemedView } from "@/components/Themed";
+import { useBudgetStore } from "@/app/store/budgetStore";
+import BudgetSettingModal from "../home/BudgetSettingModal";
+import BudgetBar from "../home/BudgetBar";
 
 export default function TabOneScreen() {
   // 管理模态框显示状态的状态变量
   const [modalVisible, setModalVisible] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState("");
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const budget = useBudgetStore((state) => state.budget);
+  const expenses = useBudgetStore((state) => state.expenses);
+  // 计算已用金额
+  const used = expenses.reduce((sum, item) => sum + (item.total || 0), 0);
+  const remaining = budget - used;
 
   // 打开模态框的函数
   const openModal = () => {
@@ -29,7 +32,7 @@ export default function TabOneScreen() {
   };
 
   // 预算设置成功回调
-  const handleSuccess = (msg = '予算が正常に設定されました！') => {
+  const handleSuccess = (msg = "予算が正常に設定されました！") => {
     setModalVisible(false);
     setSuccessMsg(msg);
     setSuccessVisible(true);
@@ -37,12 +40,12 @@ export default function TabOneScreen() {
 
   // 跳转到相机的函数
   const navigateToCamera = () => {
-    router.push('/home/Camera');
+    router.push("/home/Camera");
   };
 
   useEffect(() => {
     Font.loadAsync({
-      'azuki': require('@/assets/fonts/azuki.ttf'),
+      azuki: require("@/assets/fonts/azuki.ttf"),
     }).then(() => setFontsLoaded(true));
   }, []);
 
@@ -50,35 +53,37 @@ export default function TabOneScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText>予算：{budget}円</ThemedText>
-      
       {/* 点击文本打开模态框 */}
       <TouchableOpacity onPress={openModal}>
-        <ThemedText style={styles.modalTrigger}>予算を設定</ThemedText>
+        <ThemedText style={styles.budgetText}>
+          <p>予算</p>
+          <p>{budget}円</p>
+        </ThemedText>
       </TouchableOpacity>
-      
+
+      <ThemedText style={styles.remainingText}>残り：{remaining}円</ThemedText>
+
       <ThemedView style={{ marginVertical: 20 }}>
         <BudgetBar />
       </ThemedView>
 
       {/* 相机按钮 */}
-      <TouchableOpacity 
-        style={styles.cameraButton}
-        onPress={navigateToCamera}
-      >
+      <TouchableOpacity style={styles.cameraButton} onPress={navigateToCamera}>
         <Ionicons name="camera" size={28} color="white" />
-        <ThemedText style={styles.cameraButtonText}>レシートをスキャン</ThemedText>
+        <ThemedText style={styles.cameraButtonText}>
+          レシートをスキャン
+        </ThemedText>
       </TouchableOpacity>
 
       {/* 手动输入按钮 */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.manualButton}
-        onPress={() => router.push('/home/manualinput')}
+        onPress={() => router.push("/home/manualinput")}
       >
         <Ionicons name="create-outline" size={28} color="white" />
         <ThemedText style={styles.manualButtonText}>手動入力</ThemedText>
       </TouchableOpacity>
-      
+
       {/* 预算设置模态框组件 */}
       <BudgetSettingModal
         visible={modalVisible}
@@ -93,18 +98,41 @@ export default function TabOneScreen() {
         animationType="fade"
         onRequestClose={() => setSuccessVisible(false)}
       >
-        <View style={{
-          flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)'
-        }}>
-          <View style={{
-            backgroundColor: 'white', borderRadius: 10, padding: 30, alignItems: 'center'
-          }}>
-            <ThemedText style={{ fontSize: 18, color: '#4CAF50', marginBottom: 20 }}>{successMsg}</ThemedText>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.3)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 10,
+              padding: 30,
+              alignItems: "center",
+            }}
+          >
+            <ThemedText
+              style={{ fontSize: 18, color: "#4CAF50", marginBottom: 20 }}
+            >
+              {successMsg}
+            </ThemedText>
             <TouchableOpacity
-              style={{ backgroundColor: '#4CAF50', borderRadius: 5, paddingVertical: 8, paddingHorizontal: 30 }}
+              style={{
+                backgroundColor: "#4CAF50",
+                borderRadius: 5,
+                paddingVertical: 8,
+                paddingHorizontal: 30,
+              }}
               onPress={() => setSuccessVisible(false)}
             >
-              <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>確認</ThemedText>
+              <ThemedText
+                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
+              >
+                確認
+              </ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -114,35 +142,66 @@ export default function TabOneScreen() {
 }
 
 const styles = StyleSheet.create({
+  remainingText: {
+    color: "#4D2615",
+    fontFamily: "azuki_font",
+    fontSize: 32,
+    fontStyle: "normal",
+    fontWeight: "400",
+    marginBottom: 72.5,
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed', // React Native支持solid/dotted/dashed
+  },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start', // 内容靠上
-    paddingTop: 40,               // 顶部间距
+    alignItems: "center",
+    justifyContent: "flex-start", // 内容靠上
+    paddingTop: 40, // 顶部间距
+    backgroundColor: "#FEFDED", // 设置背景色
   },
   title: {
     fontSize: 50,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: '80%',
+    width: "80%",
+  },
+  // 新增预算文本样式
+  budgetText: {
+    display: "flex",
+    width: 302,
+    height: 35,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 142,
+    flexShrink: 0,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#4D2615",
+    marginVertical: 10,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: "#7A7A7A",
+    backgroundColor: "rgba(255,255,255,0.44)",
+    fontFamily: "azuki",
+    marginBottom: 46,
   },
   // 模态框触发器样式
   modalTrigger: {
     marginTop: 20,
     fontSize: 20,
-    color: '#2196F3',
+    color: "#2196F3",
     padding: 10,
     marginVertical: 15,
   },
   // 相机按钮样式
   cameraButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4CAF50',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4CAF50",
     borderRadius: 50,
     padding: 15,
     paddingHorizontal: 25,
@@ -152,15 +211,15 @@ const styles = StyleSheet.create({
   // 相机按钮文本样式
   cameraButtonText: {
     marginLeft: 8,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   // 手动输入按钮样式
   manualButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#2196F3',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#2196F3",
     borderRadius: 50,
     padding: 15,
     paddingHorizontal: 25,
@@ -170,7 +229,7 @@ const styles = StyleSheet.create({
   // 手动输入按钮文本样式
   manualButtonText: {
     marginLeft: 8,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
 });

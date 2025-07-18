@@ -61,7 +61,20 @@ export default function TabOneScreen() {
         </ThemedText>
       </TouchableOpacity>
 
-      <ThemedText style={styles.remainingText}>残り：{remaining}円</ThemedText>
+      <ThemedView style={styles.remainingTextContainer}>
+        <ThemedText style={styles.remainingText}>残り：{remaining}円</ThemedText>
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 8,
+            width: "100%",
+            height: 2,
+            backgroundColor: "#4D2615",
+            transform: [{ skewX: "-15deg" }],
+          }}
+        />
+      </ThemedView>
 
       <ThemedView style={{ marginVertical: 20 }}>
         <BudgetBar />
@@ -142,33 +155,13 @@ export default function TabOneScreen() {
 }
 
 const styles = StyleSheet.create({
-  remainingText: {
-    color: "#4D2615",
-    fontFamily: "azuki_font",
-    fontSize: 32,
-    fontStyle: "normal",
-    fontWeight: "400",
-    marginBottom: 72.5,
-    textDecorationLine: 'underline',
-    textDecorationStyle: 'dashed', // React Native支持solid/dotted/dashed
-  },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start", // 内容靠上
-    paddingTop: 40, // 顶部间距
+    paddingTop: 91, // 顶部间距
     backgroundColor: "#FEFDED", // 设置背景色
   },
-  title: {
-    fontSize: 50,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-  // 新增预算文本样式
   budgetText: {
     display: "flex",
     width: 302,
@@ -184,19 +177,27 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderWidth: 1,
     borderColor: "#7A7A7A",
-    backgroundColor: "rgba(255,255,255,0.44)",
     fontFamily: "azuki",
     marginBottom: 46,
+    backgroundColor: "rgba(255,255,255,0.44)",
   },
-  // 模态框触发器样式
-  modalTrigger: {
-    marginTop: 20,
-    fontSize: 20,
-    color: "#2196F3",
-    padding: 10,
-    marginVertical: 15,
+  remainingTextContainer: {
+    position: 'relative',
+    width: 220,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 47,
+    backgroundColor: '#FEFDED',
   },
-  // 相机按钮样式
+  remainingText: {
+    color: "#4D2615",
+    fontFamily: "azuki_font",
+    fontSize: 32,
+    fontStyle: "normal",
+    fontWeight: "400",
+    paddingBottom: 10,
+  },
   cameraButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -208,13 +209,11 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     elevation: 4, // 安卓阴影
   },
-  // 相机按钮文本样式
   cameraButtonText: {
     marginLeft: 8,
     color: "white",
     fontWeight: "bold",
   },
-  // 手动输入按钮样式
   manualButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -226,10 +225,25 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     elevation: 4, // 安卓阴影
   },
-  // 手动输入按钮文本样式
   manualButtonText: {
     marginLeft: 8,
     color: "white",
     fontWeight: "bold",
+  },
+  modalTrigger: {
+    marginTop: 20,
+    fontSize: 20,
+    color: "#2196F3",
+    padding: 10,
+    marginVertical: 15,
+  },
+  title: {
+    fontSize: 50,
+    fontWeight: "bold",
+  },
+  separator: {
+    marginVertical: 30,
+    height: 1,
+    width: "80%",
   },
 });

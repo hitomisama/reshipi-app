@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Modal, View } from "react-native";
+import { StyleSheet, TouchableOpacity, Modal, View, Image } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Font from "expo-font";
@@ -53,49 +53,57 @@ export default function TabOneScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {/* 点击文本打开模态框 */}
-      <TouchableOpacity onPress={openModal}>
-        <ThemedText style={styles.budgetText}>
-          <p>予算</p>
-          <p>{budget}円</p>
-        </ThemedText>
-      </TouchableOpacity>
+      <View style={styles.mainContent}>
+        {/* 点击文本打开模态框 */}
+        <TouchableOpacity onPress={openModal}>
+          <ThemedText style={styles.budgetText}>
+            <p>予算</p>
+            <p>{budget}円</p>
+          </ThemedText>
+        </TouchableOpacity>
 
-      <ThemedView style={styles.remainingTextContainer}>
-        <ThemedText style={styles.remainingText}>残り：{remaining}円</ThemedText>
-        <View
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 8,
-            width: "100%",
-            height: 2,
-            backgroundColor: "#4D2615",
-            transform: [{ skewX: "-15deg" }],
-          }}
-        />
-      </ThemedView>
+        {/* 显示剩余预算 */}
+        <ThemedView style={styles.remainingTextContainer}>
+          <ThemedText style={styles.remainingText}>
+            残り：{remaining}円
+          </ThemedText>
+          <View
+            style={{
+              position: "absolute",
+              left: 0,
+              bottom: 8,
+              width: "100%",
+              height: 2,
+              backgroundColor: "#4D2615",
+              transform: [{ skewX: "-15deg" }],
+            }}
+          />
+        </ThemedView>
 
-      <ThemedView style={{ marginVertical: 20 }}>
-        <BudgetBar />
-      </ThemedView>
+        {/* 猪 */}
+        <ThemedView style={{ marginVertical: 20 }}>
+          <BudgetBar />
+        </ThemedView>
+      </View>
 
-      {/* 相机按钮 */}
-      <TouchableOpacity style={styles.cameraButton} onPress={navigateToCamera}>
-        <Ionicons name="camera" size={28} color="white" />
-        <ThemedText style={styles.cameraButtonText}>
-          レシートをスキャン
-        </ThemedText>
-      </TouchableOpacity>
-
-      {/* 手动输入按钮 */}
-      <TouchableOpacity
-        style={styles.manualButton}
-        onPress={() => router.push("/home/manualinput")}
-      >
-        <Ionicons name="create-outline" size={28} color="white" />
-        <ThemedText style={styles.manualButtonText}>手動入力</ThemedText>
-      </TouchableOpacity>
+      {/* 手动输入和相机按钮图片左右排列 */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => router.push("/home/manualinput")}
+        >
+          <Image
+            source={require("@/assets/images/pen_icon.png")}
+            style={styles.buttonImage}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton} onPress={navigateToCamera}>
+          <Image
+            source={require("@/assets/images/camera.icon.png")}
+            style={styles.buttonImage}
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* 预算设置模态框组件 */}
       <BudgetSettingModal
@@ -155,12 +163,32 @@ export default function TabOneScreen() {
 }
 
 const styles = StyleSheet.create({
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 20,
+    width: '80%',
+    alignSelf: 'center',
+    marginTop: '10%',
+  },
+  iconButton: {
+    backgroundColor: "transparent",
+    borderRadius: 50,
+    padding: 10,
+  },
+  buttonImage: {
+    width: 60,
+    height: 60,
+    resizeMode: "contain",
+  },
   container: {
     flex: 1,
+    display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start", // 内容靠上
-    paddingTop: 91, // 顶部间距
-    backgroundColor: "#FEFDED", // 设置背景色
+    justifyContent: "flex-start", 
+    paddingTop: 91, 
+    backgroundColor: "#FEFDED", 
   },
   budgetText: {
     display: "flex",
@@ -182,13 +210,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.44)",
   },
   remainingTextContainer: {
-    position: 'relative',
+    position: "relative",
     width: 220,
     height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 47,
-    backgroundColor: '#FEFDED',
+    backgroundColor: "#FEFDED",
   },
   remainingText: {
     color: "#4D2615",
@@ -245,5 +273,12 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 1,
     width: "80%",
+  },
+  mainContent: {
+    flex: 1,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
 });

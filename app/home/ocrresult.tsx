@@ -13,7 +13,7 @@ import {
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
-import { useBudgetStore } from '@/app/store/budgetStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-native-get-random-values';
 import * as MediaLibrary from 'expo-media-library';
@@ -65,11 +65,22 @@ export default function OCRResultScreen() {
     return `${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日`;
   });
   const [shop, setShop] = useState<string>('');
+  const [budget, setBudgetState] = useState<number>(30000);
 
-  // 获取预算store函数
-  const addExpense = useBudgetStore((state) => state.addExpense);
-  const budget = useBudgetStore((state) => state.budget);
-  const setBudget = useBudgetStore((state) => state.setBudget);
+  // 从AsyncStorage加载预算
+  useEffect(() => {
+    const loadBudget = async () => {
+      try {
+        const budgetJson = await AsyncStorage.getItem('app_budget');
+        if (budgetJson) {
+          setBudgetState(parseFloat(budgetJson));
+        }
+      } catch (error) {
+        console.log('加载预算失败:', error);
+      }
+    };
+    loadBudget();
+  }, []);
   
   useEffect(() => {
     async function handleImage() {
@@ -120,30 +131,32 @@ export default function OCRResultScreen() {
     handleImage();
   }, [params.image, params.items, params.shop]);
   
-  // 保存结果到预算中
-  const saveResults = () => {
-    const newBudget = budget - total;
-    setBudget(newBudget);
+  // 保存结果到AsyncStorage和更新预算
+  const saveResults = async () => {
+    try {
+      const newBudget = budget - total;
+      
+      // 更新预算到AsyncStorage
+      await AsyncStorage.setItem('app_budget', newBudget.toString());
+      setBudgetState(newBudget);
 
-    addExpense({
-      id: uuidv4(),
-      date: new Date().toISOString(),
-      items: results,
-      total,
-    });
+      // 显示提示信息
+      if (budget < total) {
+        const exceed = total - budget;
+        Alert.alert('警告', `予算を${exceed}円超えています`);
+      } else {
+        Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`);
+      }
 
-    if (budget < total) {
-      const exceed = total - budget;
-      Alert.alert('警告', `予算を${exceed}円超えています`);
-    } else {
-      Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`);
-    }
-
-    // 无论弹窗如何，保存后直接跳转到 history 页面
-    if (Platform.OS === 'web') {
-      setTimeout(() => router.push('/history'), 100);
-    } else {
-      setTimeout(() => router.push('/history'), 500); // 给弹窗一点时间
+      // 无论弹窗如何，保存后直接跳转到 history 页面
+      if (Platform.OS === 'web') {
+        setTimeout(() => router.push('/history'), 100);
+      } else {
+        setTimeout(() => router.push('/history'), 500); // 给弹窗一点时间
+      }
+    } catch (error) {
+      console.log('保存失败:', error);
+      Alert.alert('错误', '保存失败，请重试');
     }
   };
 

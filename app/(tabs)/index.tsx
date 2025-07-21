@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, Modal, View, Image } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Font from "expo-font";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { ThemedText, ThemedView } from "@/components/Themed";
-import { useBudgetStore } from "@/app/store/budgetStore";
 import BudgetSettingModal from "../home/BudgetSettingModal";
 import BudgetBar from "../home/BudgetBar";
 
@@ -15,10 +15,15 @@ export default function TabOneScreen() {
   const [successVisible, setSuccessVisible] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const budget = useBudgetStore((state) => state.budget);
-  const expenses = useBudgetStore((state) => state.expenses);
+  const [budget, setBudget] = useState(30000);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  
   // 计算已用金额
-  const used = expenses.reduce((sum, item) => sum + (item.total || 0), 0);
+  const used = expenses.reduce((sum, item) => {
+    if (item.total) return sum + item.total;
+    if (item.items) return sum + item.items.reduce((s: number, it: any) => s + (it.price || 0), 0);
+    return sum + (item.price || 0);
+  }, 0);
   const remaining = budget - used;
 
   // 打开模态框的函数
@@ -32,10 +37,12 @@ export default function TabOneScreen() {
   };
 
   // 预算设置成功回调
-  const handleSuccess = (msg = "予算が正常に設定されました！") => {
+  const handleSuccess = async (msg = "予算が正常に設定されました！") => {
     setModalVisible(false);
     setSuccessMsg(msg);
     setSuccessVisible(true);
+    // 重新加载数据
+    await loadData();
   };
 
   // 跳转到相机的函数
@@ -43,11 +50,39 @@ export default function TabOneScreen() {
     router.push("/home/Camera");
   };
 
+  // 从AsyncStorage加载数据
+  const loadData = async () => {
+    try {
+      // 加载预算
+      const budgetJson = await AsyncStorage.getItem('app_budget');
+      if (budgetJson) {
+        setBudget(parseFloat(budgetJson));
+      }
+      
+      // 加载支出记录
+      const expensesJson = await AsyncStorage.getItem('ocr_items');
+      if (expensesJson) {
+        setExpenses(JSON.parse(expensesJson));
+      }
+    } catch (error) {
+      console.log('加载数据失败:', error);
+    }
+  };
+
   useEffect(() => {
+    loadData(); // 组件加载时读取数据
+    
     Font.loadAsync({
       azuki: require("@/assets/fonts/azuki.ttf"),
     }).then(() => setFontsLoaded(true));
   }, []);
+
+  // 使用useFocusEffect在页面获得焦点时重新加载数据
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   if (!fontsLoaded) return null; // 或显示 loading
 

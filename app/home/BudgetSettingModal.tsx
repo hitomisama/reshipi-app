@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, Modal, View as RNView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
-import { useBudgetStore } from '@/app/store/budgetStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface BudgetSettingModalProps {
   visible: boolean;
@@ -16,29 +16,31 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
   onSuccess
 }) => {
   const [inputBudget, setInputBudget] = useState('');
-  const budget = useBudgetStore((state) => state.budget);
-  const setBudget = useBudgetStore((state) => state.setBudget);
 
   // 保存预算的函数
-  const saveBudget = () => {
+  const saveBudget = async () => {
     const budgetValue = parseFloat(inputBudget);
     if (!isNaN(budgetValue)) { // 允许负数
-      setBudget(budgetValue);
-      setInputBudget('');
-      onClose(); // 关闭输入模态框
-      if (onSuccess) onSuccess('予算が正常に設定されました！'); // 只调用回调
-      // 跳转到支出履历页面
-      if (typeof window !== 'undefined') {
-        // Web
-        window.setTimeout(() => {
-          window.location.hash = '#/history';
-        }, 300);
-      } else {
-        // 移动端
-        setTimeout(() => {
-          // @ts-ignore
-          if (typeof router !== 'undefined') router.push('/history');
-        }, 300);
+      try {
+        await AsyncStorage.setItem('app_budget', budgetValue.toString());
+        setInputBudget('');
+        onClose(); // 关闭输入模态框
+        if (onSuccess) onSuccess('予算が正常に設定されました！'); // 只调用回调
+        // 跳转到支出履历页面
+        if (typeof window !== 'undefined') {
+          // Web
+          window.setTimeout(() => {
+            window.location.hash = '#/history';
+          }, 300);
+        } else {
+          // 移动端
+          setTimeout(() => {
+            // @ts-ignore
+            if (typeof router !== 'undefined') router.push('/history');
+          }, 300);
+        }
+      } catch (error) {
+        console.log('保存预算失败:', error);
       }
     }
   };

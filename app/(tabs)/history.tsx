@@ -49,6 +49,7 @@ export default function HistoryScreen() {
     if (item.items) return sum + item.items.reduce((s: number, it: any) => s + (it.price || 0), 0);
     return sum + (item.price || 0);
   }, 0);
+   console .log('total', total);
 
   // 按天分组
   const dayMap: { [key: string]: any[] } = {};

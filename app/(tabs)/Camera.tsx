@@ -351,11 +351,13 @@ export default function CameraScreen() {
               ・長いレシートはなるべく項目が被らな{"\n"}
               　いようにして分割して撮影してください
             </ThemedText>
-            
-            <Image
-              source={require("@/assets/images/receipt.png")}
-              style={styles.receiptImage}
-            />
+            <RNView style={styles.redLine} />
+            <RNView style={styles.imageWindow}>
+              <Image
+                source={require("@/assets/images/receipt.png")}
+                style={styles.receiptImage}
+              />
+            </RNView>
           </RNView>
         </RNView>
       </Modal>
@@ -367,6 +369,7 @@ export default function CameraScreen() {
 
           {/* 按钮容器 - 使用绝对定位覆盖在相机上 */}
           <RNView style={styles.buttonContainer}>
+
             {/* 相册预览按钮 */}
             <TouchableOpacity style={styles.galleryPreview} onPress={pickImage}>
               {galleryPreview ? (
@@ -548,12 +551,31 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 15,
   },
+  imageWindow: {
+    backgroundColor: "#AE6C3BB2",
+    borderRadius: 15,
+    padding: 20,
+    marginTop: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    position: "relative",
+  },
   receiptImage: {
-    width: 200, // 可以根据需要调整大小
+    width: 200,
     height: 350,
     resizeMode: "contain",
-    alignSelf: "center",
-    marginTop: 20,
-    backgroundColor: "#AE6C3BB2",
+  },
+  redLine: {
+    position: "absolute",
+    left: 67,
+    right: 0,
+    top: "67%",
+    marginTop: -1.5,
+    height: 3,
+    backgroundColor: '#D90000',
+    borderRadius: 1,
+    width: "70%",
+    zIndex: 1,
   },
 });

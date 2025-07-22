@@ -303,7 +303,7 @@ export default function CameraScreen() {
         {/* 左上角返回按钮 */}
         <TouchableOpacity
           style={styles.topButton}
-          onPress={() => router.back()}
+          onPress={() => router.replace('/(tabs)/')}
         >
           <Image
             source={require("@/assets/images/returnbutton.png")}

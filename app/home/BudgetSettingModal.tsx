@@ -3,6 +3,7 @@ import { StyleSheet, TouchableOpacity, Modal, View as RNView, TextInput } from '
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 interface BudgetSettingModalProps {
   visible: boolean;
@@ -30,18 +31,10 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         setSuccessMsg(`予算が${budgetValue.toLocaleString()}円に設定されました！`);
         setSuccessVisible(true); // 显示成功弹窗
         if (onDataReload) onDataReload(); // 重新加载数据
-        if (typeof window !== 'undefined') {
-          // Web
-          window.setTimeout(() => {
-            window.location.hash = '#/history';
-          }, 300);
-        } else {
-          // 移动端
-          setTimeout(() => {
-            // @ts-ignore
-            if (typeof router !== 'undefined') router.push('/(tabs)/history');
-          }, 300);
-        }
+        // 使用正确的 Expo Router 导航
+        setTimeout(() => {
+          router.push('/(tabs)/history');
+        }, 300);
       } catch (error) {
         console.log('保存预算失败:', error);
       }

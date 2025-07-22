@@ -10,5 +10,9 @@ export default {
     extra: {
       apiKey: process.env.GOOGLE_VISION_API_KEY,
     },
+    web: {
+      bundler: 'metro',
+    },
+    plugins: ['expo-router'],
   },
 };

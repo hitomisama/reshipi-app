@@ -111,7 +111,7 @@ export default function TabOneScreen() {
 
         {/* 猪 */}
         <ThemedView style={{ marginVertical: 20 }}>
-          <BudgetBar />
+          <BudgetBar remaining={remaining} budget={budget} />
         </ThemedView>
       </View>
 

@@ -39,7 +39,7 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
           // 移动端
           setTimeout(() => {
             // @ts-ignore
-            if (typeof router !== 'undefined') router.push('/history');
+            if (typeof router !== 'undefined') router.push('/(tabs)/history');
           }, 300);
         }
       } catch (error) {

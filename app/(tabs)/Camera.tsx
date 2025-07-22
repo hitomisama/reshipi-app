@@ -145,7 +145,7 @@ export default function CameraScreen() {
           const ocrResult = await ocrImageBase64(photo.base64);
           await saveItemsToStorage(ocrResult.items); // 新增：保存到本地
           router.push({
-            pathname: '/home/ocrresult',
+            pathname: '/(tabs)/ocrresult',
             params: { 
               image: photo.uri,
               items: JSON.stringify(ocrResult.items)
@@ -177,12 +177,29 @@ export default function CameraScreen() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedImage = result.assets[0];
-        const imageUri = selectedImage.uri;
+        let imageUri = selectedImage.uri;
+        
+        // 处理 ph:// URI，转换为本地可用的 URI
+        if (imageUri.startsWith('ph://')) {
+          try {
+            const assetId = imageUri.replace('ph://', '').split('/')[0];
+            const asset = await MediaLibrary.getAssetInfoAsync(assetId);
+            if (asset.localUri && asset.localUri.startsWith('file://')) {
+              imageUri = asset.localUri;
+            } else {
+              // 如果没有本地 URI，使用原始 URI（可能需要额外处理）
+              console.warn('无法获取本地 URI，使用原始 URI');
+            }
+          } catch (e) {
+            console.warn('转换 ph:// URI 失败:', e);
+          }
+        }
+        
         if (selectedImage.base64) {
           const ocrResult = await ocrImageBase64(selectedImage.base64);
           await saveItemsToStorage(ocrResult.items); // 新增：保存到本地
           router.push({
-            pathname: '/home/ocrresult',
+            pathname: '/(tabs)/ocrresult',
             params: { 
               image: imageUri,
               items: JSON.stringify(ocrResult.items)

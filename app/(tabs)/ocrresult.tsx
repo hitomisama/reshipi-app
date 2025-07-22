@@ -25,17 +25,21 @@ async function getLocalUriFromPhUri(phUri: string) {
     const assetId = phUri.replace('ph://', '').split('/')[0];
     try {
       const asset = await MediaLibrary.getAssetInfoAsync(assetId);
-      // 只返回本地 file:// 路径
+      // 优先使用本地 file:// 路径
       if (asset.localUri && asset.localUri.startsWith('file://')) {
         return asset.localUri;
       }
-      // asset.uri 可能是 assets-library:// 或其它协议，不能直接用
+      // 如果没有本地 URI，尝试使用 asset.uri
+      if (asset.uri) {
+        return asset.uri;
+      }
       return null;
     } catch (e) {
-      console.warn('无法转换 ph:// uri', e);
+      console.warn('无法转换 ph:// uri:', e);
       return null;
     }
   }
+  // 如果不是 ph:// 协议，直接返回
   return phUri;
 }
 
@@ -150,9 +154,9 @@ export default function OCRResultScreen() {
 
       // 无论弹窗如何，保存后直接跳转到 history 页面
       if (Platform.OS === 'web') {
-        setTimeout(() => router.push('/history'), 100);
+        setTimeout(() => router.push('/(tabs)/history'), 100);
       } else {
-        setTimeout(() => router.push('/history'), 500); // 给弹窗一点时间
+        setTimeout(() => router.push('/(tabs)/history'), 500); // 给弹窗一点时间
       }
     } catch (error) {
       console.log('保存失败:', error);
@@ -206,6 +210,15 @@ export default function OCRResultScreen() {
         }}
       />
       <ScrollView style={styles.scrollContainer}>
+        {/* 显示拍摄的图片 */}
+        {image ? (
+          <Image source={{ uri: image }} style={styles.receiptImage} />
+        ) : (
+          <ThemedView style={styles.placeholderImage}>
+            <ThemedText>画像が表示できません</ThemedText>
+          </ThemedView>
+        )}
+        
         {/* 合计/日期/店铺 */}
         <ThemedView style={styles.infoSection}>
           <ThemedView style={styles.infoRow}>
@@ -297,18 +310,25 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   receiptImage: {
-    width: '100%',
+    width: '90%',
     height: 200,
     marginBottom: 20,
+    marginHorizontal: '5%',
+    borderRadius: 10,
+    resizeMode: 'contain',
   },
   placeholderImage: {
-    width: '100%',
+    width: '90%',
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
     marginBottom: 20,
+    marginHorizontal: '5%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
   },
   placeholderText: {
     marginTop: 10,

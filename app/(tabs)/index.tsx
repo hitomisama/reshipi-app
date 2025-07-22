@@ -41,7 +41,7 @@ export default function TabOneScreen() {
 
   // 跳转到相机的函数
   const navigateToCamera = () => {
-    router.push("/home/Camera");
+    router.push("/(tabs)/Camera");
   };
 
   // 从AsyncStorage加载数据
@@ -119,7 +119,7 @@ export default function TabOneScreen() {
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => router.push("/home/manualinput")}
+          onPress={() => router.push("/(tabs)/manualinput")}
         >
           <Image
             source={require("@/assets/images/pen_icon.png")}

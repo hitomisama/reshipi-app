@@ -31,10 +31,6 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         setSuccessMsg(`予算が${budgetValue.toLocaleString()}円に設定されました！`);
         setSuccessVisible(true); // 显示成功弹窗
         if (onDataReload) onDataReload(); // 重新加载数据
-        // 使用正确的 Expo Router 导航
-        setTimeout(() => {
-          router.push('/(tabs)/history');
-        }, 300);
       } catch (error) {
         console.log('保存预算失败:', error);
       }

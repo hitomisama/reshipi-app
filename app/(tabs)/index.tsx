@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   budgetText: {
     display: "flex",
-    width: 302,
+    // width: 302,
     height: 35,
     justifyContent: "center",
     alignItems: "center",
@@ -190,10 +190,12 @@ const styles = StyleSheet.create({
     fontFamily: "azuki",
     marginBottom: 46,
     backgroundColor: "rgba(255,255,255,0.44)",
+    paddingLeft: 10, 
+    paddingRight: 10,
   },
   remainingTextContainer: {
     position: "relative",
-    width: 220,
+    // width: 230,
     height: 60,
     justifyContent: "center",
     alignItems: "center",

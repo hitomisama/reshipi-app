@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     position: "absolute",
-    top: 80,
+    top: 65,
     left: 35, // 根据实际图片内容调整
-    width: 40,
+    width: 48,
     height: 120,
     backgroundColor: "white",
     borderRadius: 10,

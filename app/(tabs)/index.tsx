@@ -12,8 +12,6 @@ import BudgetBar from "../home/BudgetBar";
 export default function TabOneScreen() {
   // 管理模态框显示状态的状态变量
   const [modalVisible, setModalVisible] = useState(false);
-  const [successVisible, setSuccessVisible] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [budget, setBudget] = useState(30000);
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -36,12 +34,8 @@ export default function TabOneScreen() {
     setModalVisible(false);
   };
 
-  // 预算设置成功回调
-  const handleSuccess = async (msg = "予算が正常に設定されました！") => {
-    setModalVisible(false);
-    setSuccessMsg(msg);
-    setSuccessVisible(true);
-    // 重新加载数据
+  // 数据重新加载回调
+  const handleDataReload = async () => {
     await loadData();
   };
 
@@ -92,8 +86,8 @@ export default function TabOneScreen() {
         {/* 点击文本打开模态框 */}
         <TouchableOpacity onPress={openModal}>
           <ThemedText style={styles.budgetText}>
-            <p>予算</p>
-            <p>{budget}円</p>
+            <ThemedText>予算</ThemedText>
+            <ThemedText>{budget}円</ThemedText>
           </ThemedText>
         </TouchableOpacity>
 
@@ -144,55 +138,8 @@ export default function TabOneScreen() {
       <BudgetSettingModal
         visible={modalVisible}
         onClose={closeModal}
-        onSuccess={handleSuccess} // 新增：设置成功时回调
+        onDataReload={handleDataReload} // 数据重新加载回调
       />
-
-      {/* 保存成功提示弹窗 */}
-      <Modal
-        visible={successVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSuccessVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0,0,0,0.3)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              borderRadius: 10,
-              padding: 30,
-              alignItems: "center",
-            }}
-          >
-            <ThemedText
-              style={{ fontSize: 18, color: "#4CAF50", marginBottom: 20 }}
-            >
-              {successMsg}
-            </ThemedText>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#4CAF50",
-                borderRadius: 5,
-                paddingVertical: 8,
-                paddingHorizontal: 30,
-              }}
-              onPress={() => setSuccessVisible(false)}
-            >
-              <ThemedText
-                style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
-              >
-                確認
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ThemedView>
   );
 }
@@ -231,7 +178,7 @@ const styles = StyleSheet.create({
     height: 35,
     justifyContent: "center",
     alignItems: "center",
-    gap: 142,
+    gap: 143,
     flexShrink: 0,
     fontSize: 22,
     fontWeight: "bold",

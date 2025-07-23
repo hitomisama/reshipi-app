@@ -1,10 +1,9 @@
 // history.tsx
-import React, { useEffect, useState } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
-import { ThemedView, ThemedText } from '@/components/Themed';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from "react";
+import { ScrollView, TouchableOpacity, View, StyleSheet, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function getMonthRange(year: number, month: number) {
   const start = new Date(year, month, 1);
@@ -13,7 +12,9 @@ function getMonthRange(year: number, month: number) {
     start,
     end,
     label: `${year}年${month + 1}月`,
-    range: `${start.getMonth() + 1}月1日〜${end.getMonth() + 1}月${end.getDate()}日`
+    range: `${start.getMonth() + 1}月1日〜${
+      end.getMonth() + 1
+    }月${end.getDate()}日`,
   };
 }
 
@@ -26,7 +27,7 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     (async () => {
-      const json = await AsyncStorage.getItem('ocr_items');
+      const json = await AsyncStorage.getItem("ocr_items");
       const arr = json ? JSON.parse(json) : [];
       setItems(arr);
     })();
@@ -36,7 +37,7 @@ export default function HistoryScreen() {
     // 过滤当前月
     const { start, end } = getMonthRange(currentYear, currentMonth);
     setFiltered(
-      items.filter(item => {
+      items.filter((item) => {
         const d = new Date(item.date || 0);
         return d >= start && d <= end;
       })
@@ -46,110 +47,254 @@ export default function HistoryScreen() {
   // 合计金额
   const total = filtered.reduce((sum, item) => {
     if (item.total) return sum + item.total;
-    if (item.items) return sum + item.items.reduce((s: number, it: any) => s + (it.price || 0), 0);
+    if (item.items)
+      return (
+        sum + item.items.reduce((s: number, it: any) => s + (it.price || 0), 0)
+      );
     return sum + (item.price || 0);
   }, 0);
-   console .log('total', total);
+  console.log("total", total);
 
-  // 按天分组
-  const dayMap: { [key: string]: any[] } = {};
-  filtered.forEach(item => {
-    const d = new Date(item.date || 0);
-    const day = d.getDate();
-    if (!dayMap[day]) dayMap[day] = [];
-    dayMap[day].push(item);
-  });
-  const days = Object.keys(dayMap).sort((a, b) => Number(b) - Number(a));
+  // 按日期排序记录
+  const sortedRecords = filtered.sort(
+    (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+  );
 
   const { label, range } = getMonthRange(currentYear, currentMonth);
 
   return (
-    <ThemedView style={{ flex: 1, backgroundColor: '#FFFFF5', paddingHorizontal: 0 }}>
+    <View style={styles.container}>
       {/* 顶部标题和月份切换 */}
-      <View style={{ alignItems: 'center', marginTop: 30, marginBottom: 10 }}>
-        <ThemedText style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>登録履歴</ThemedText>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => setCurrentMonth(m => m === 0 ? 11 : m - 1)} style={{ padding: 10 }}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleText}>登録履歴</Text>
+        <View style={styles.monthSwitchContainer}>
+          <TouchableOpacity
+            onPress={() => setCurrentMonth((m) => (m === 0 ? 11 : m - 1))}
+            style={{ padding: 10 }}
+          >
             <Ionicons name="chevron-back" size={22} color="#333" />
           </TouchableOpacity>
           <View>
-            <ThemedText style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>{label}</ThemedText>
-            <ThemedText style={{ fontSize: 13, color: '#333', textAlign: 'center' }}>{range}</ThemedText>
+            <Text style={styles.monthLabel}>{label}</Text>
+            <Text style={styles.monthRange}>{range}</Text>
           </View>
-          <TouchableOpacity onPress={() => setCurrentMonth(m => m === 11 ? 0 : m + 1)} style={{ padding: 10 }}>
+          <TouchableOpacity
+            onPress={() => setCurrentMonth((m) => (m === 11 ? 0 : m + 1))}
+            style={{ padding: 10 }}
+          >
             <Ionicons name="chevron-forward" size={22} color="#333" />
           </TouchableOpacity>
         </View>
       </View>
       {/* 合计金额 */}
-      <View style={{ backgroundColor: '#FFE4E1', borderRadius: 8, marginHorizontal: 24, marginBottom: 18, padding: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-        <ThemedText style={{ fontSize: 18, fontWeight: 'bold', color: '#333', marginRight: 20 }}>合計</ThemedText>
-        <ThemedText style={{ fontSize: 22, fontWeight: 'bold', color: '#C2185B', letterSpacing: 1 }}>{total}円</ThemedText>
+      <View style={styles.totalContainer}>
+        <Text style={styles.totalLabel}>合計</Text>
+        <Text style={styles.totalValue}>{total}円</Text>
       </View>
       {/* 列表 */}
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
-        {days.length === 0 && (
-          <ThemedText style={{ color: '#888', textAlign: 'center', marginTop: 40 }}>履歴がありません</ThemedText>
+      <ScrollView style={styles.scrollView}>
+        {sortedRecords.length === 0 && (
+          <Text style={styles.emptyMessage}>履歴がありません</Text>
         )}
-        {days.map(day => (
-          <View key={day} style={{ marginBottom: 18 }}>
-            <ThemedText style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4, color: '#7B6F4B' }}>{day}日</ThemedText>
-            {dayMap[day].map((item, idx) => (
-              <View
-                key={idx}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#FFF',
-                  borderRadius: 10,
-                  paddingVertical: 10,
-                  paddingHorizontal: 16,
-                  marginBottom: 8,
-                  shadowColor: '#E0E0E0',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 2,
-                  elevation: 1,
+        {sortedRecords.map((item, idx) => (
+          <View key={idx} style={styles.recordContainer}>
+            <View style={styles.recordLeft}>
+              <View style={styles.dateContainer}>
+                <Text style={styles.dateText}>
+                  {new Date(item.date || 0).getDate()}
+                </Text>
+                <Text style={styles.dateText}>日</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.recordContent}
+                onPress={() => {
+                  // 查看详细记录逻辑
+                  const details = `日付: ${new Date(
+                    item.date
+                  ).toLocaleDateString()}
+商品名: ${item.shop || (item.items && item.items[0]?.item) || item.item || "—"}
+金額: ${
+                    item.total
+                      ? item.total
+                      : item.items
+                      ? item.items.reduce(
+                          (s: number, it: any) => s + (it.price || 0),
+                          0
+                        )
+                      : item.price
+                  }円`;
+                  alert(details);
                 }}
               >
-                <TouchableOpacity
-                  style={{ flex: 1 }}
-                  onPress={() => {
-                    // 查看详细记录逻辑
-                    const details = `日付: ${new Date(item.date).toLocaleDateString()}\n商品名: ${item.shop || (item.items && item.items[0]?.item) || item.item || '—'}\n金額: ${item.total ? item.total : (item.items ? item.items.reduce((s: number, it: any) => s + (it.price || 0), 0) : item.price)}円`;
-                    alert(details);
-                  }}
-                >
-                  <ThemedText style={{ fontSize: 16, fontWeight: 'bold', color: '#4A4A4A', flex: 1, letterSpacing: 2 }}>
-                    {item.shop || (item.items && item.items[0]?.item) || item.item || '—'}
-                  </ThemedText>
-                </TouchableOpacity>
-                <ThemedText style={{ fontSize: 18, color: '#C2185B', fontWeight: 'bold', minWidth: 70, textAlign: 'right', fontFamily: 'monospace' }}>
-                  {item.total ? item.total : (item.items ? item.items.reduce((s: number, it: any) => s + (it.price || 0), 0) : item.price)}円
-                </ThemedText>
-                <TouchableOpacity
-                  onPress={async () => {
-                    // 删除记录逻辑
-                    const updatedItems = items.filter((_, i) => i !== idx);
-                    setItems(updatedItems);
-                    await AsyncStorage.setItem('ocr_items', JSON.stringify(updatedItems));
-                  }}
-                  style={{ marginLeft: 10 }}
-                >
-                  <Ionicons name="trash" size={22} color="red" />
-                </TouchableOpacity>
-              </View>
-            ))}
+                <Text style={styles.recordText}>
+                  {item.shop ||
+                    (item.items && item.items[0]?.item) ||
+                    item.item ||
+                    "—"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.recordValue}>
+              {item.total
+                ? item.total
+                : item.items
+                ? item.items.reduce(
+                    (s: number, it: any) => s + (it.price || 0),
+                    0
+                  )
+                : item.price}
+              円
+            </Text>
+            <TouchableOpacity
+              onPress={async () => {
+                // 删除记录逻辑
+                const updatedItems = items.filter((_, i) => i !== idx);
+                setItems(updatedItems);
+                await AsyncStorage.setItem(
+                  "ocr_items",
+                  JSON.stringify(updatedItems)
+                );
+              }}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash" size={22} color="red" />
+            </TouchableOpacity>
           </View>
         ))}
         <View style={{ height: 40 }} />
       </ScrollView>
-      {/* 返回首页按钮，可选 */}
-      {/*
-      <TouchableOpacity style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }} onPress={() => router.push('/') }>
-        <Ionicons name="arrow-back" size={28} color="#333" />
-      </TouchableOpacity>
-      */}
-    </ThemedView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFF5",
+    paddingHorizontal: 0,
+  },
+  titleContainer: {
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 10,
+  },
+  titleText: {
+    fontSize: 26,
+    marginBottom: 24.5,
+    marginTop: 74,
+    fontFamily: "azuki_font",
+  },
+  monthSwitchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  monthLabel: {
+    fontSize: 26,
+    textAlign: "center",
+    marginBottom: 7.5,
+    fontFamily: "azuki_font",
+  },
+  monthRange: {
+    fontSize: 23,
+    color: "#000000",
+    textAlign: "center",
+    marginBottom: 24.5,
+    fontFamily: "azuki_font",
+  },
+  totalContainer: {
+    backgroundColor: "#FFD8D0",
+    marginHorizontal: 24,
+    marginBottom: 18,
+    padding: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  totalLabel: {
+    fontSize: 32,
+    color: "#000000",
+    marginRight: 20,
+    fontFamily: "azuki_font",
+  },
+  totalValue: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#C2185B",
+    letterSpacing: 1,
+    fontFamily: "azuki_font",
+  },
+  dayContainer: {
+    marginBottom: 18,
+  },
+  dateText: {
+    fontSize: 26,
+    color: "black",
+    marginRight: 12,
+    minWidth: 30,
+    fontFamily: "azuki_font",
+  },
+  recordLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  recordContent: {
+    flex: 1,
+  },
+  dayRow: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  dayLabel: {
+    fontSize: 16,
+    color: "#7B6F4B",
+  },
+  recordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    shadowColor: "#E0E0E0",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  recordText: {
+    fontSize: 26,
+    color: "#000",
+    flex: 1,
+    letterSpacing: 2,
+    fontFamily: "azuki_font",
+    paddingLeft: 10,
+  },
+  recordValue: {
+    fontSize: 26,
+    color: "#000",
+    minWidth: 70,
+    textAlign: "right",
+    fontFamily: "azuki_font",
+  },
+  deleteButton: {
+    marginLeft: 10,
+  },
+  emptyMessage: {
+    color: "#888",
+    textAlign: "center",
+    marginTop: 40,
+    fontFamily: "azuki_font",
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  dateContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginBottom: 4,
+    gap: 8,
+  },
+});

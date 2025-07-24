@@ -9,7 +9,7 @@ export default function ManualInputScreen() {
 
   // 分类选项，与 ocrresult.tsx 保持一致
   const CATEGORY_OPTIONS = [
-    '選択してください',
+    '選択',
     '食材',
     '飲み物',
     '果物',
@@ -23,6 +23,8 @@ export default function ManualInputScreen() {
   ]);
   // 店铺名称
   const [shop, setShop] = useState('');
+  // 用于电脑端下拉菜单的状态
+  const [dropdownVisible, setDropdownVisible] = useState<number | null>(null);
 
   // 添加新项目
   const addItem = () => {
@@ -60,7 +62,10 @@ export default function ManualInputScreen() {
 
   // 显示分类选择器
   const showCategoryPicker = (index: number) => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'web') {
+      // Web端显示/隐藏下拉菜单
+      setDropdownVisible(dropdownVisible === index ? null : index);
+    } else if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
           options: ['キャンセル', ...CATEGORY_OPTIONS],
@@ -85,6 +90,12 @@ export default function ManualInputScreen() {
       
       Alert.alert('項目を選択', '', buttons);
     }
+  };
+
+  // Web端选择分类
+  const selectCategory = (index: number, category: string) => {
+    updateItemCategory(index, category);
+    setDropdownVisible(null);
   };
 
   // 保存数据到本地存储
@@ -206,15 +217,40 @@ export default function ManualInputScreen() {
                 onChangeText={(value) => updateItemName(index, value)}
               />
               
-              <TouchableOpacity 
-                style={styles.pickerContainer}
-                onPress={() => showCategoryPicker(index)}
-              >
-                <Text style={styles.categoryText}>
-                  {item.category}
-                </Text>
-                <Ionicons name="chevron-down" size={16} color="#666" />
-              </TouchableOpacity>
+              <View style={styles.categoryContainer}>
+                <TouchableOpacity 
+                  style={styles.pickerContainer}
+                  onPress={() => showCategoryPicker(index)}
+                >
+                  <Text style={styles.categoryText}>
+                    {item.category}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color="#666" />
+                </TouchableOpacity>
+                
+                {/* Web端下拉菜单 */}
+                {Platform.OS === 'web' && dropdownVisible === index && (
+                  <View style={styles.dropdown}>
+                    {CATEGORY_OPTIONS.map((option, optionIndex) => (
+                      <TouchableOpacity
+                        key={optionIndex}
+                        style={[
+                          styles.dropdownItem,
+                          option === item.category && styles.dropdownItemSelected
+                        ]}
+                        onPress={() => selectCategory(index, option)}
+                      >
+                        <Text style={[
+                          styles.dropdownItemText,
+                          option === item.category && styles.dropdownItemTextSelected
+                        ]}>
+                          {option}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
               
               <View style={styles.priceContainer}>
                 <TextInput
@@ -273,7 +309,6 @@ const styles = StyleSheet.create({
     maxWidth: isWeb ? 400 : undefined,
     alignSelf: isWeb ? 'center' : 'stretch',
   },
-  // 合计部分样式
   totalSection: {
     marginBottom: 20,
   },
@@ -298,7 +333,6 @@ const styles = StyleSheet.create({
     color: '#4D2615',
     fontFamily: 'azuki_font',
   },
-  // 信息部分样式
   infoSection: {
     marginBottom: 70,
   },
@@ -330,7 +364,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     fontFamily: 'azuki_font',
   },
-  // 表格样式
   tableSection: {
     marginBottom: 20,
   },
@@ -351,13 +384,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'azuki_font',
   },
-  tableHeaderText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4D2615',
-    textAlign: 'center',
-    fontFamily: 'azuki_font',
-  },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -371,10 +397,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4D2615',
     textAlign: 'center',
-    paddingVertical: 8,
+    paddingVertical: 5,
     fontFamily: 'azuki_font',
+    width: '100%',
   },
   itemInput: {
+    flex: 1,
     textAlign: 'left',
     borderColor: '#ddd',
     borderWidth: 1,
@@ -392,21 +420,19 @@ const styles = StyleSheet.create({
     // Android 阴影
     elevation: 2,
   },
-  categoryPicker: {
-    fontSize: 14,
-    color: '#4D2615',
-    fontFamily: 'azuki_font',
-    height: 40,
-    width: '100%',
+  categoryContainer: {
+    flex: 1,
+    position: 'relative',
+    marginRight: 8,
+    
   },
   pickerContainer: {
     flex: 1,
-    height: 40,
+    height: 50,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
     backgroundColor: '#fff',
-    marginHorizontal: 4,
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
@@ -418,6 +444,43 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     // Android 阴影
     elevation: 2,
+    
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    maxHeight: 200,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  dropdownItemSelected: {
+    backgroundColor: '#e3f2fd',
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: '#4D2615',
+    fontFamily: 'azuki_font',
+    textAlign: 'center',
+  },
+  dropdownItemTextSelected: {
+    color: '#1976d2',
+    fontWeight: 'bold',
   },
   categoryText: {
     fontSize: 14,
@@ -425,6 +488,8 @@ const styles = StyleSheet.create({
     fontFamily: 'azuki_font',
     flex: 1,
     textAlign: 'center',
+        paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   priceContainer: {
     flex: 1,
@@ -460,7 +525,6 @@ const styles = StyleSheet.create({
   removeButton: {
     padding: 4,
   },
-  // 按钮样式
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',

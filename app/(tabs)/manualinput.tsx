@@ -6,16 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
 export default function ManualInputScreen() {
-  // 商品选项
-  const productOptions = [
-    '米', 'パン', '牛乳', '卵', '肉', '野菜', '果物', 'お菓子', '飲料', '調味料', '日用品', 'その他'
-  ];
 
   // 分类选项，与 ocrresult.tsx 保持一致
   const CATEGORY_OPTIONS = [
     '選択してください',
     '食材',
     '飲み物',
+    '果物',
     'おやつ',
     '外食',
     '他',

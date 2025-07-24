@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, Modal, View, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, Modal, View, Image, Platform, Dimensions } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Font from "expo-font";
@@ -85,10 +85,10 @@ export default function TabOneScreen() {
       <View style={styles.mainContent}>
         {/* 点击文本打开模态框 */}
         <TouchableOpacity onPress={openModal}>
-          <ThemedText style={styles.budgetText}>
-            <ThemedText>予算</ThemedText>
-            <ThemedText>{budget}円</ThemedText>
-          </ThemedText>
+          <View style={styles.budgetText}>
+            <ThemedText style={styles.budgetLeftText}>予算</ThemedText>
+            <ThemedText style={styles.budgetRightText}>{budget}円</ThemedText>
+          </View>
         </TouchableOpacity>
 
         {/* 显示剩余预算 */}
@@ -96,17 +96,6 @@ export default function TabOneScreen() {
           <ThemedText style={styles.remainingText}>
             残り：{remaining}円
           </ThemedText>
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              bottom: 8,
-              width: "100%",
-              height: 2,
-              backgroundColor: "#4D2615",
-              transform: [{ skewX: "-15deg" }],
-            }}
-          />
         </ThemedView>
 
         {/* 猪 */}
@@ -144,125 +133,144 @@ export default function TabOneScreen() {
   );
 }
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isWeb = Platform.OS === 'web';
+
 const styles = StyleSheet.create({
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 20,
-    width: '80%',
-    alignSelf: 'center',
-    marginTop: '10%',
-  },
-  iconButton: {
-    backgroundColor: "transparent",
-    borderRadius: 50,
-    padding: 10,
-  },
-  buttonImage: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-  },
-  container: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start", 
-    paddingTop: 91, 
-    backgroundColor: "#FEFDED", 
-  },
-  budgetText: {
-    display: "flex",
-    // width: 302,
-    height: 35,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 143,
-    flexShrink: 0,
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#4D2615",
-    marginVertical: 10,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: "#7A7A7A",
-    fontFamily: "azuki",
-    marginBottom: 46,
-    backgroundColor: "rgba(255,255,255,0.44)",
-    paddingLeft: 10, 
-    paddingRight: 10,
-  },
-  remainingTextContainer: {
-    position: "relative",
-    // width: 230,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 47,
-    backgroundColor: "#FEFDED",
-  },
-  remainingText: {
-    color: "#4D2615",
-    fontFamily: "azuki_font",
-    fontSize: 32,
-    fontStyle: "normal",
-    fontWeight: "400",
-    paddingBottom: 10,
-  },
-  cameraButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#4CAF50",
-    borderRadius: 50,
-    padding: 15,
-    paddingHorizontal: 25,
-    marginVertical: 20,
-    elevation: 4, // 安卓阴影
-  },
-  cameraButtonText: {
-    marginLeft: 8,
-    color: "white",
-    fontWeight: "bold",
-  },
-  manualButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#2196F3",
-    borderRadius: 50,
-    padding: 15,
-    paddingHorizontal: 25,
-    marginVertical: 10,
-    elevation: 4, // 安卓阴影
-  },
-  manualButtonText: {
-    marginLeft: 8,
-    color: "white",
-    fontWeight: "bold",
-  },
-  modalTrigger: {
-    marginTop: 20,
-    fontSize: 20,
-    color: "#2196F3",
-    padding: 10,
-    marginVertical: 15,
-  },
-  title: {
-    fontSize: 50,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-  mainContent: {
-    flex: 1,
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
+container: {
+  flex: 1,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start", 
+  paddingTop: isWeb ? 60 : 91, 
+  backgroundColor: "#FEFDED",
+  minHeight: isWeb ? screenHeight : undefined,
+},
+mainContent: {
+  flex: 1,
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  maxWidth: isWeb ? 800 : undefined,
+  alignSelf: 'center',
+},
+budgetText: {
+  display: "flex",
+  height: isWeb ? 45 : 35,
+  justifyContent: isWeb ? "center" : "space-between",
+  alignItems: "center",
+  flexDirection: "row",
+  flexShrink: 0,
+  marginVertical: isWeb ? 15 : 10,
+  borderRadius: 9,
+  borderWidth: 1,
+  borderColor: "#7A7A7A",
+  marginBottom: isWeb ? 35 : 46,
+  backgroundColor: "rgba(255,255,255,0.44)",
+  paddingLeft: isWeb ? 20 : 10, 
+  paddingRight: isWeb ? 20 : 10,
+  minWidth: isWeb ? 350 : 250, // 手机端确保有足够宽度
+  ...(isWeb && { gap: 100 }), // 只在web端使用gap
+},
+budgetLeftText: {
+  fontSize: isWeb ? 26 : 22,
+  color: "#4D2615",
+  fontFamily: "azuki",
+  ...(isWeb ? {} : { marginRight: 100 }), // 手机端通过marginRight创建100px间距
+},
+budgetRightText: {
+  fontSize: isWeb ? 26 : 22,
+  color: "#4D2615",
+  fontFamily: "azuki",
+},
+remainingTextContainer: {
+  position: "relative",
+  height: isWeb ? 70 : 60,
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: isWeb ? 35 : 47,
+  backgroundColor: "#FEFDED",
+  minWidth: isWeb ? 300 : undefined,
+},
+remainingText: {
+  color: "#4D2615",
+  fontFamily: "azuki_font",
+  fontSize: isWeb ? 36 : 32,
+  fontStyle: "normal",
+  fontWeight: "400",
+  paddingBottom: 10,
+  borderBottomColor: "#4D2615",
+  borderBottomWidth: 2,
+},
+buttonRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginVertical: isWeb ? 30 : 20,
+  width: isWeb ? '60%' : '80%',
+  alignSelf: 'center',
+  marginTop: isWeb ? '5%' : '10%',
+  maxWidth: isWeb ? 400 : undefined,
+},
+iconButton: {
+  backgroundColor: "transparent",
+  borderRadius: 50,
+  padding: isWeb ? 15 : 10,
+},
+buttonImage: {
+  width: isWeb ? 80 : 60,
+  height: isWeb ? 80 : 60,
+  resizeMode: "contain",
+},
+cameraButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#4CAF50",
+  borderRadius: 50,
+  padding: isWeb ? 20 : 15,
+  paddingHorizontal: isWeb ? 35 : 25,
+  marginVertical: isWeb ? 25 : 20,
+  elevation: 4, // 安卓阴影
+},
+cameraButtonText: {
+  marginLeft: 8,
+  color: "white",
+  fontWeight: "bold",
+  fontSize: isWeb ? 16 : 14,
+},
+manualButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#2196F3",
+  borderRadius: 50,
+  padding: isWeb ? 20 : 15,
+  paddingHorizontal: isWeb ? 35 : 25,
+  marginVertical: isWeb ? 15 : 10,
+  elevation: 4, // 安卓阴影
+},
+manualButtonText: {
+  marginLeft: 8,
+  color: "white",
+  fontWeight: "bold",
+  fontSize: isWeb ? 16 : 14,
+},
+modalTrigger: {
+  marginTop: isWeb ? 30 : 20,
+  fontSize: isWeb ? 22 : 20,
+  color: "#2196F3",
+  padding: isWeb ? 15 : 10,
+  marginVertical: isWeb ? 20 : 15,
+},
+title: {
+  fontSize: isWeb ? 60 : 50,
+  fontWeight: "bold",
+},
+separator: {
+  marginVertical: isWeb ? 40 : 30,
+  height: 1,
+  width: "80%",
+},
 });

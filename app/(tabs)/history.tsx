@@ -1,6 +1,6 @@
 // history.tsx
 import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, View, StyleSheet, Text } from "react-native";
+import { ScrollView, TouchableOpacity, View, StyleSheet, Text, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -167,21 +167,25 @@ export default function HistoryScreen() {
   );
 }
 
+const isWeb = Platform.OS === 'web';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFF5",
     paddingHorizontal: 0,
+    maxWidth: isWeb ? 900 : undefined,
+    alignSelf: isWeb ? 'center' : 'stretch',
   },
   titleContainer: {
     alignItems: "center",
-    marginTop: 30,
-    marginBottom: 10,
+    marginTop: isWeb ? 40 : 30,
+    marginBottom: isWeb ? 15 : 10,
   },
   titleText: {
-    fontSize: 26,
-    marginBottom: 24.5,
-    marginTop: 74,
+    fontSize: isWeb ? 30 : 26,
+    marginBottom: isWeb ? 30 : 24.5,
+    marginTop: isWeb ? 60 : 74,
     fontFamily: "azuki_font",
   },
   monthSwitchContainer: {
@@ -189,48 +193,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   monthLabel: {
-    fontSize: 26,
+    fontSize: isWeb ? 30 : 26,
     textAlign: "center",
-    marginBottom: 7.5,
+    marginBottom: isWeb ? 10 : 7.5,
     fontFamily: "azuki_font",
   },
   monthRange: {
-    fontSize: 23,
+    fontSize: isWeb ? 26 : 23,
     color: "#000000",
     textAlign: "center",
-    marginBottom: 24.5,
+    marginBottom: isWeb ? 30 : 24.5,
     fontFamily: "azuki_font",
   },
   totalContainer: {
     backgroundColor: "#FFD8D0",
-    marginHorizontal: 24,
-    marginBottom: 18,
-    padding: 16,
+    marginHorizontal: isWeb ? 32 : 24,
+    marginBottom: isWeb ? 24 : 18,
+    padding: isWeb ? 20 : 16,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
+    borderRadius: isWeb ? 12 : 8,
   },
   totalLabel: {
-    fontSize: 32,
+    fontSize: isWeb ? 36 : 32,
     color: "#000000",
-    marginRight: 20,
+    marginRight: isWeb ? 25 : 20,
     fontFamily: "azuki_font",
   },
   totalValue: {
-    fontSize: 22,
+    fontSize: isWeb ? 26 : 22,
     fontWeight: "bold",
     color: "#C2185B",
     letterSpacing: 1,
     fontFamily: "azuki_font",
   },
   dayContainer: {
-    marginBottom: 18,
+    marginBottom: isWeb ? 24 : 18,
   },
   dateText: {
-    fontSize: 26,
+    fontSize: isWeb ? 30 : 26,
     color: "black",
-    marginRight: 12,
-    minWidth: 30,
+    marginRight: isWeb ? 16 : 12,
+    minWidth: isWeb ? 40 : 30,
     fontFamily: "azuki_font",
   },
   recordLeft: {
@@ -244,57 +249,60 @@ const styles = StyleSheet.create({
   dayRow: {
     flexDirection: "column",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: isWeb ? 6 : 4,
   },
   dayLabel: {
-    fontSize: 16,
+    fontSize: isWeb ? 18 : 16,
     color: "#7B6F4B",
   },
   recordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginBottom: 8,
+    borderRadius: isWeb ? 12 : 10,
+    paddingVertical: isWeb ? 14 : 10,
+    paddingHorizontal: isWeb ? 20 : 16,
+    marginBottom: isWeb ? 12 : 8,
     shadowColor: "#E0E0E0",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,
     shadowRadius: 2,
     elevation: 1,
+    backgroundColor: "#FFF",
   },
   recordText: {
-    fontSize: 26,
+    fontSize: isWeb ? 30 : 26,
     color: "#000",
     flex: 1,
     letterSpacing: 2,
     fontFamily: "azuki_font",
-    paddingLeft: 10,
+    paddingLeft: isWeb ? 15 : 10,
   },
   recordValue: {
-    fontSize: 26,
+    fontSize: isWeb ? 30 : 26,
     color: "#000",
-    minWidth: 70,
+    minWidth: isWeb ? 90 : 70,
     textAlign: "right",
     fontFamily: "azuki_font",
   },
   deleteButton: {
-    marginLeft: 10,
+    marginLeft: isWeb ? 15 : 10,
+    padding: isWeb ? 8 : 4,
   },
   emptyMessage: {
     color: "#888",
     textAlign: "center",
-    marginTop: 40,
+    marginTop: isWeb ? 60 : 40,
     fontFamily: "azuki_font",
+    fontSize: isWeb ? 18 : 16,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: isWeb ? 32 : 16,
   },
   dateContainer: {
     flexDirection: "column",
     alignItems: "center",
-    marginBottom: 4,
-    gap: 8,
+    marginBottom: isWeb ? 6 : 4,
+    gap: isWeb ? 12 : 8,
   },
 });

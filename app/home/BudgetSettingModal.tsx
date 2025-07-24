@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, View as RNView, TextInput } from 'react-native';
+import { StyleSheet, TouchableOpacity, Modal, View as RNView, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -113,6 +113,8 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
   );
 };
 
+const isWeb = Platform.OS === 'web';
+
 const styles = StyleSheet.create({
   // 模态框容器样式
   modalContainer: {
@@ -123,18 +125,20 @@ const styles = StyleSheet.create({
   },
   // 模态框内容样式
   modalContent: {
-    width: '80%',
+    width: isWeb ? '40%' : '80%',
+    maxWidth: isWeb ? 500 : undefined,
+    minWidth: isWeb ? 400 : undefined,
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: isWeb ? 15 : 10,
+    padding: isWeb ? 30 : 20,
     alignItems: 'center',
     elevation: 5, // 安卓阴影
   },
   // 标题样式
   title: {
-    fontSize: 18,
+    fontSize: isWeb ? 22 : 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: isWeb ? 25 : 20,
     color: '#333',
   },
   // 输入框样式
@@ -142,18 +146,18 @@ const styles = StyleSheet.create({
     width: '100%',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    fontSize: 16,
+    borderRadius: isWeb ? 8 : 5,
+    padding: isWeb ? 15 : 10,
+    marginBottom: isWeb ? 25 : 20,
+    fontSize: isWeb ? 18 : 16,
   },
   // 保存按钮样式
   saveButton: {
     backgroundColor: '#EBFFEA',
-    borderRadius: 5,
-    padding: 12,
-    width: '30%',
-    marginBottom: 10,
+    borderRadius: isWeb ? 8 : 5,
+    padding: isWeb ? 15 : 12,
+    width: isWeb ? '40%' : '30%',
+    marginBottom: isWeb ? 15 : 10,
     borderColor: 'black',
     borderWidth: 1,
   },
@@ -162,20 +166,21 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: isWeb ? 18 : 16,
   },
   // 关闭按钮样式
   closeButton: {
     backgroundColor: '#2196F3',
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: isWeb ? 8 : 5,
+    padding: isWeb ? 15 : 10,
     width: '100%',
   },
   // 关闭按钮文本样式
   closeButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontSize: isWeb ? 18 : 16,
   },
 });
 

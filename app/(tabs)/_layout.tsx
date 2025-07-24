@@ -42,11 +42,11 @@ export default function TabLayout() {
           headerShown: useClientOnlyValue(false, true),
           tabBarStyle: {
             backgroundColor: '#7EC4A4', // 背景色
-            height: isWeb ? 90 : 75, // 增加标签栏高度
+            height: 75, // 增加标签栏高度
             borderTopColor: '#7EC4A4', // 设置顶部边框颜色
             borderTopWidth: 0, // 移除顶部边框
-            paddingBottom: isWeb ? 12 : 8, // 底部内边距
-            paddingTop: isWeb ? 12 : 8, // 顶部内边距
+            paddingBottom: 8, // 底部内边距
+            paddingTop: 8, // 顶部内边距
             elevation: 10, // Android 阴影
             shadowColor: '#000', // iOS 阴影颜色
             shadowOffset: { width: 0, height: -2 }, // iOS 阴影偏移
@@ -54,13 +54,13 @@ export default function TabLayout() {
             shadowRadius: 8, // iOS 阴影半径
           },
           tabBarLabelStyle: {
-            fontSize: isWeb ? 14 : 12,
+            fontSize: 12,
             fontWeight: '600',
             fontFamily: 'azuki_font', // 使用自定义字体
-            marginTop: isWeb ? 6 : 4,
+            marginTop: 4,
           },
           tabBarIconStyle: {
-            marginBottom: isWeb ? 4 : 2,
+            marginBottom: 2,
           },
         }}>
 

@@ -125,20 +125,20 @@ const styles = StyleSheet.create({
   },
   // 模态框内容样式
   modalContent: {
-    width: isWeb ? '40%' : '80%',
-    maxWidth: isWeb ? 500 : undefined,
-    minWidth: isWeb ? 400 : undefined,
+    width: '80%',
+    maxWidth: undefined,
+    minWidth: undefined,
     backgroundColor: 'white',
-    borderRadius: isWeb ? 15 : 10,
-    padding: isWeb ? 30 : 20,
+    borderRadius: 10,
+    padding: 20,
     alignItems: 'center',
     elevation: 5, // 安卓阴影
   },
   // 标题样式
   title: {
-    fontSize: isWeb ? 22 : 18,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: isWeb ? 25 : 20,
+    marginBottom: 20,
     color: '#333',
   },
   // 输入框样式
@@ -146,18 +146,18 @@ const styles = StyleSheet.create({
     width: '100%',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: isWeb ? 8 : 5,
-    padding: isWeb ? 15 : 10,
-    marginBottom: isWeb ? 25 : 20,
-    fontSize: isWeb ? 18 : 16,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+    fontSize: 16,
   },
   // 保存按钮样式
   saveButton: {
     backgroundColor: '#EBFFEA',
-    borderRadius: isWeb ? 8 : 5,
-    padding: isWeb ? 15 : 12,
-    width: isWeb ? '40%' : '30%',
-    marginBottom: isWeb ? 15 : 10,
+    borderRadius: 5,
+    padding: 12,
+    width: '30%',
+    marginBottom: 10,
     borderColor: 'black',
     borderWidth: 1,
   },
@@ -166,13 +166,13 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
   },
   // 关闭按钮样式
   closeButton: {
     backgroundColor: '#2196F3',
-    borderRadius: isWeb ? 8 : 5,
-    padding: isWeb ? 15 : 10,
+    borderRadius: 5,
+    padding: 10,
     width: '100%',
   },
   // 关闭按钮文本样式
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
   },
 });
 

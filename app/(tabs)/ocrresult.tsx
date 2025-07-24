@@ -8,7 +8,8 @@ import {
   View,
   TextInput,
   ActionSheetIOS,
-  Platform
+  Platform,
+  Text
 } from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { ThemedText, ThemedView } from '@/components/Themed';
@@ -193,66 +194,58 @@ export default function OCRResultScreen() {
     }
   }
 
-  // 在 return 语句中，将所有组件改为使用 ThemedView 和 ThemedText
   return (
-    <ThemedView style={[styles.container, {backgroundColor:'#FFFFF5'}]}>
-      <Stack.Screen 
-        options={{
-          title: 'レシート撮影画面',
-          headerLeft: () => (
-            <TouchableOpacity 
-              style={styles.backButton} 
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color="#2196F3" />
-            </TouchableOpacity>
-          ),
-        }}
-      />
+    <View style={[styles.container, {backgroundColor:'#FFFFF5'}]}>
+      <View style={styles.readingResultTitle}>
+        <Text style={{
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: 'azuki_font',
+    fontSize: 18,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 22,
+    marginVertical: 12,
+    marginTop: 20,
+  }}>読み取り結果編集</Text>
+      </View>
+
       <ScrollView style={styles.scrollContainer}>
-        {/* 显示拍摄的图片 */}
-        {image ? (
-          <Image source={{ uri: image }} style={styles.receiptImage} />
-        ) : (
-          <ThemedView style={styles.placeholderImage}>
-            <ThemedText>画像が表示できません</ThemedText>
-          </ThemedView>
-        )}
-        
+
         {/* 合计/日期/店铺 */}
-        <ThemedView style={styles.infoSection}>
-          <ThemedView style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>合計</ThemedText>
-            <ThemedText style={styles.infoValue}>{total}円</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>日付</ThemedText>
+        <View style={styles.infoSection}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>合計</Text>
+            <Text style={styles.infoValue}>{total}円</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>日付</Text>
             <TextInput
               style={styles.infoInput}
               value={date}
               onChangeText={setDate}
               placeholder="2025年05月02日"
             />
-          </ThemedView>
-          <ThemedView style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>店舗</ThemedText>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>店舗</Text>
             <TextInput
               style={styles.infoInput}
               value={shop}
               onChangeText={setShop}
               placeholder="コンビニ名"
             />
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
         {/* 商品表格 */}
-        <ThemedView style={styles.tableSection}>
-          <ThemedView style={styles.tableHeader}>
-            <ThemedText style={styles.tableHeaderCell}>商品</ThemedText>
-            <ThemedText style={styles.tableHeaderCell}>項目</ThemedText>
-            <ThemedText style={styles.tableHeaderCell}>金額</ThemedText>
-          </ThemedView>
+        <View style={styles.tableSection}>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderCell}>商品</Text>
+            <Text style={styles.tableHeaderCell}>項目</Text>
+            <Text style={styles.tableHeaderCell}>金額</Text>
+          </View>
           {results.map((item, index) => (
-            <ThemedView key={index} style={styles.tableRow}>
+            <View key={index} style={styles.tableRow}>
               <TextInput
                 style={styles.tableCell}
                 value={item.item}
@@ -271,9 +264,9 @@ export default function OCRResultScreen() {
                   setResults(newResults);
                 })}
               >
-                <ThemedText style={styles.categoryCellText}>
+                <Text style={styles.categoryCellText}>
                   {item.category || '他'}
-                </ThemedText>
+                </Text>
               </TouchableOpacity>
               <TextInput
                 style={styles.tableCell}
@@ -286,16 +279,16 @@ export default function OCRResultScreen() {
                   setTotal(newResults.reduce((acc, i) => acc + i.price, 0));
                 }}
               />
-            </ThemedView>
+            </View>
           ))}
-        </ThemedView>
+        </View>
 
         {/* 登録按钮 */}
         <TouchableOpacity style={styles.registerButton} onPress={saveResults}>
-          <ThemedText style={styles.registerButtonText}>登録</ThemedText>
+          <Text style={styles.registerButtonText}>登録</Text>
         </TouchableOpacity>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -304,233 +297,251 @@ const isWeb = Platform.OS === 'web';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    maxWidth: isWeb ? 900 : undefined,
+    maxWidth: isWeb ? 400 : undefined,
     alignSelf: isWeb ? 'center' : 'stretch',
   },
   scrollContainer: {
     flex: 1,
   },
   backButton: {
-    marginLeft: isWeb ? 20 : 15,
+    marginLeft: 15,
   },
   receiptImage: {
-    width: isWeb ? '70%' : '90%',
-    height: isWeb ? 300 : 200,
-    marginBottom: isWeb ? 30 : 20,
-    marginHorizontal: isWeb ? '15%' : '5%',
-    borderRadius: isWeb ? 15 : 10,
+    width: '90%',
+    height: 200,
+    marginBottom: 20,
+    marginHorizontal: '5%',
+    borderRadius: 10,
     resizeMode: 'contain',
   },
   placeholderImage: {
-    width: isWeb ? '70%' : '90%',
-    height: isWeb ? 300 : 200,
+    width: '90%',
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
-    borderRadius: isWeb ? 15 : 10,
-    marginBottom: isWeb ? 30 : 20,
-    marginHorizontal: isWeb ? '15%' : '5%',
+    borderRadius: 10,
+    marginBottom: 20,
+    marginHorizontal: '5%',
     borderWidth: 1,
     borderColor: '#ddd',
     borderStyle: 'dashed',
   },
   placeholderText: {
-    marginTop: isWeb ? 15 : 10,
+    marginTop: 10,
     color: '#666',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
   },
   resultsContainer: {
-    padding: isWeb ? 24 : 15,
+    padding: 15,
   },
   resultsTitle: {
-    fontSize: isWeb ? 22 : 18,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: isWeb ? 20 : 15,
+    marginBottom: 15,
   },
   itemsContainer: {
     backgroundColor: '#f9f9f9',
-    borderRadius: isWeb ? 15 : 10,
-    padding: isWeb ? 20 : 15,
-    marginBottom: isWeb ? 30 : 20,
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
   },
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: isWeb ? 12 : 8,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   itemName: {
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
   },
   itemPrice: {
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
     fontWeight: '500',
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: isWeb ? 20 : 15,
-    paddingTop: isWeb ? 15 : 10,
+    marginTop: 15,
+    paddingTop: 10,
     borderTopWidth: 2,
     borderTopColor: '#ddd',
   },
   totalLabel: {
-    fontSize: isWeb ? 22 : 18,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   totalPrice: {
-    fontSize: isWeb ? 22 : 18,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#4CAF50',
   },
   noResultsContainer: {
-    padding: isWeb ? 30 : 20,
+    padding: 20,
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
-    borderRadius: isWeb ? 15 : 10,
+    borderRadius: 10,
   },
   noResultsText: {
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
     color: '#F44336',
     textAlign: 'center',
   },
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: isWeb ? 30 : 20,
+    marginTop: 20,
   },
   secondaryButton: {
     backgroundColor: '#9E9E9E',
-    borderRadius: isWeb ? 12 : 10,
-    padding: isWeb ? 18 : 15,
+    borderRadius: 10,
+    padding: 15,
     flex: 1,
-    marginRight: isWeb ? 15 : 10,
+    marginRight: 10,
     alignItems: 'center',
   },
   secondaryButtonText: {
     color: 'white',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   saveButton: {
     backgroundColor: '#4CAF50',
-    borderRadius: isWeb ? 12 : 10,
-    padding: isWeb ? 18 : 15,
+    borderRadius: 10,
+    padding: 15,
     flex: 1,
-    marginLeft: isWeb ? 15 : 10,
+    marginLeft: 10,
     alignItems: 'center',
   },
   saveButtonText: {
     color: 'white',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   infoSection: {
     backgroundColor: '#FFFFF5',
-    padding: isWeb ? 24 : 16,
-    borderRadius: isWeb ? 15 : 10,
-    marginBottom: isWeb ? 15 : 10,
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: isWeb ? 12 : 8,
+    marginBottom: 8,
   },
   infoLabel: {
-    width: isWeb ? 70 : 50,
+    width: 50,
     fontWeight: 'bold',
-    fontSize: isWeb ? 18 : 16,
+    fontSize: 16,
+    fontFamily: 'azuki_font',
   },
   infoValue: {
-    fontSize: isWeb ? 18 : 16,
-    marginLeft: isWeb ? 15 : 10,
+    fontSize: 16,
+    marginLeft: 10,
+    fontFamily: 'azuki_font',
   },
   infoInput: {
     flex: 1,
     borderBottomWidth: 1,
     borderColor: '#ccc',
-    fontSize: isWeb ? 18 : 16,
-    marginLeft: isWeb ? 15 : 10,
-    paddingVertical: isWeb ? 4 : 2,
+    fontSize: 16,
+    marginLeft: 10,
+    paddingVertical: 2,
+    fontFamily: 'azuki_font',
   },
   tableSection: {
     backgroundColor: '#fff',
-    borderRadius: isWeb ? 15 : 10,
-    padding: isWeb ? 15 : 10,
-    marginBottom: isWeb ? 15 : 10,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
   },
   tableHeader: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderColor: '#eee',
-    paddingBottom: isWeb ? 8 : 6,
-    marginBottom: isWeb ? 8 : 6,
+    paddingBottom: 6,
+    marginBottom: 6,
   },
   tableHeaderCell: {
     flex: 1,
     fontWeight: 'bold',
-    fontSize: isWeb ? 18 : 15,
+    fontSize: 15,
     textAlign: 'center',
+    fontFamily: 'azuki_font',
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: isWeb ? 6 : 4,
+    marginBottom: 4,
   },
   tableCell: {
     flex: 1,
     borderWidth: 1,
     borderColor: '#eee',
-    borderRadius: isWeb ? 8 : 5,
-    padding: isWeb ? 8 : 4,
-    fontSize: isWeb ? 16 : 15,
-    marginHorizontal: isWeb ? 4 : 2,
+    borderRadius: 5,
+    padding: 4,
+    fontSize: 15,
+    marginHorizontal: 2,
     backgroundColor: '#FAFAFA',
     textAlign: 'center',
+    fontFamily: 'azuki_font',
   },
   categoryCell: {
     backgroundColor: '#FAFAFA',
     borderWidth: 1,
     borderColor: '#eee',
-    borderRadius: isWeb ? 8 : 5,
+    borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: isWeb ? 10 : 6,
-    marginHorizontal: isWeb ? 4 : 2,
+    paddingVertical: 6,
+    marginHorizontal: 2,
   },
   categoryCellText: {
-    fontSize: isWeb ? 16 : 15,
+    fontSize: 15,
     color: '#333',
     textAlign: 'center',
+    fontFamily: 'azuki_font',
   },
   categoryNoteBox: {
     alignSelf: 'flex-end',
-    marginBottom: isWeb ? 15 : 10,
+    marginBottom: 10,
     backgroundColor: 'transparent',
-    paddingRight: isWeb ? 15 : 10,
+    paddingRight: 10,
   },
   categoryNoteTitle: {
     fontWeight: 'bold',
-    fontSize: isWeb ? 18 : 15,
-    marginBottom: isWeb ? 4 : 2,
+    fontSize: 15,
+    marginBottom: 2,
   },
   categoryNoteItem: {
-    fontSize: isWeb ? 16 : 14,
+    fontSize: 14,
     color: '#333',
-    marginBottom: isWeb ? 2 : 1,
+    marginBottom: 1,
   },
   registerButton: {
     backgroundColor: '#4CAF50',
-    borderRadius: isWeb ? 15 : 10,
-    padding: isWeb ? 20 : 15,
+    borderRadius: 10,
+    padding: 15,
     alignItems: 'center',
-    marginTop: isWeb ? 15 : 10,
-    marginBottom: isWeb ? 40 : 30,
+    marginTop: 10,
+    marginBottom: 30,
   },
   registerButtonText: {
     color: 'white',
-    fontSize: isWeb ? 20 : 18,
+    fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'azuki_font',
+  },
+  readingResultTitle: {
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: 'azuki_font',
+    fontSize: 18,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 22,
+    marginVertical: 12,
+    marginTop: 20,
   },
 });

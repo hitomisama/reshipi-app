@@ -4,6 +4,8 @@ import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Font from "expo-font";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// 如果需要在移动端使用模糊效果，可以安装并导入 @react-native-community/blur
+// import { BlurView } from '@react-native-community/blur';
 
 import { ThemedText, ThemedView } from "@/components/Themed";
 import BudgetSettingModal from "../home/BudgetSettingModal";
@@ -88,6 +90,10 @@ export default function TabOneScreen() {
           <View style={styles.budgetText}>
             <ThemedText style={styles.budgetLeftText}>予算</ThemedText>
             <ThemedText style={styles.budgetRightText}>{budget}円</ThemedText>
+            <Image
+              source={require("@/assets/images/Pencil.png")}
+              style={styles.budgetIcon}
+            />
           </View>
         </TouchableOpacity>
 
@@ -154,6 +160,12 @@ mainContent: {
   alignItems: 'center',
   maxWidth: isWeb ? 400 : undefined,
   alignSelf: 'center',
+  // Web端模糊效果
+  ...(isWeb && {
+    filter: 'blur(0px)',
+  }),
+  // 移动端可以使用opacity或其他效果代替模糊
+  // opacity: isWeb ? 1 : 0.8,
 },
 budgetText: {
   display: "flex",
@@ -172,6 +184,12 @@ budgetText: {
   paddingRight: 10,
   minWidth: 250, // 手机端确保有足够宽度
   ...(isWeb ? {} : { gap: 0 }), // web端也不使用gap，保持一致
+},
+budgetIcon: {
+  width: 20,
+  height: 20,
+  marginLeft: 5,
+  resizeMode: "contain",
 },
 budgetLeftText: {
   fontSize: 22,

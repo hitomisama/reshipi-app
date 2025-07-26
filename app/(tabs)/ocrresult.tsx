@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import 'react-native-get-random-values';
 import * as MediaLibrary from 'expo-media-library';
 import { Picker } from '@react-native-picker/picker';
+import { useSuccessAlert } from '@/components/SuccessAlert';
 
 // 工具函数：将 ph:// URI 转换为本地可用 URI
 async function getLocalUriFromPhUri(phUri: string) {
@@ -71,20 +72,24 @@ export default function OCRResultScreen() {
   });
   const [shop, setShop] = useState<string>('');
   const [budget, setBudgetState] = useState<number>(30000);
+  
+  // 使用独立的成功提示逻辑
+  const { show: showSuccessAlert, SuccessAlertComponent } = useSuccessAlert();
 
   // 从AsyncStorage加载预算
-  useEffect(() => {
-    const loadBudget = async () => {
-      try {
-        const budgetJson = await AsyncStorage.getItem('app_budget');
-        if (budgetJson) {
-          setBudgetState(parseFloat(budgetJson));
-        }
-      } catch (error) {
-        console.log('加载预算失败:', error);
+  const loadData = async () => {
+    try {
+      const budgetJson = await AsyncStorage.getItem('app_budget');
+      if (budgetJson) {
+        setBudgetState(parseFloat(budgetJson));
       }
-    };
-    loadBudget();
+    } catch (error) {
+      console.log('加载预算失败:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
   
   useEffect(() => {
@@ -136,29 +141,20 @@ export default function OCRResultScreen() {
     handleImage();
   }, [params.image, params.items, params.shop]);
   
-  // 保存结果到AsyncStorage和更新预算
+  // 保存結果到AsyncStorage和更新預算
   const saveResults = async () => {
     try {
       const newBudget = budget - total;
       
-      // 更新预算到AsyncStorage
+      // 更新預算到AsyncStorage
       await AsyncStorage.setItem('app_budget', newBudget.toString());
       setBudgetState(newBudget);
 
-      // 显示提示信息
-      if (budget < total) {
-        const exceed = total - budget;
-        Alert.alert('警告', `予算を${exceed}円超えています`);
-      } else {
-        Alert.alert('成功', `レシートが保存されました！消費 ${total}¥、残り予算 ${newBudget}¥`);
-      }
+      // 顯示成功提示
+      showSuccessAlert();
+      
+      // 2秒後隱藏提示並跳轉
 
-      // 无论弹窗如何，保存后直接跳转到 history 页面
-      if (Platform.OS === 'web') {
-        setTimeout(() => router.push('/(tabs)/history'), 100);
-      } else {
-        setTimeout(() => router.push('/(tabs)/history'), 500); // 给弹窗一点时间
-      }
     } catch (error) {
       console.log('保存失败:', error);
       Alert.alert('错误', '保存失败，请重试');
@@ -288,6 +284,9 @@ export default function OCRResultScreen() {
           <Text style={styles.registerButtonText}>登録</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* 成功提示組件 */}
+      <SuccessAlertComponent onDataReload={loadData} />
     </View>
   );
 }

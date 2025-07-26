@@ -293,14 +293,17 @@ export default function ManualInputScreen() {
 const isWeb = Platform.OS === 'web';
 
 const styles = StyleSheet.create({
+  // 主容器
   container: {
     paddingTop: 91,
     flex: 1,
     backgroundColor: '#FEFDED',
   },
+  // 返回按钮
   backButton: {
     marginLeft: 15,
   },
+  // 滚动视图
   scrollView: {
     flex: 1,
   },
@@ -309,6 +312,7 @@ const styles = StyleSheet.create({
     maxWidth: isWeb ? 400 : undefined,
     alignSelf: isWeb ? 'center' : 'stretch',
   },
+  // 合计金额部分
   totalSection: {
     marginBottom: 20,
   },
@@ -333,6 +337,7 @@ const styles = StyleSheet.create({
     color: '#4D2615',
     fontFamily: 'azuki_font',
   },
+  // 日期和店铺信息部分
   infoSection: {
     marginBottom: 70,
   },
@@ -364,17 +369,17 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     fontFamily: 'azuki_font',
   },
+  // 商品表格部分
   tableSection: {
     marginBottom: 20,
   },
   tableHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 1,
     paddingVertical: 12,
     borderBottomWidth: 2,
     borderBottomColor: '#4D2615',
-    marginBottom: 21,
   },
   tableHeaderCell: {
     flex: 1,
@@ -387,17 +392,17 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical:20,
     borderBottomWidth: 1,
     borderBottomColor: '#4D2615',
+    
   },
   tableCell: {
     flex: 1,
     fontSize: 16,
     color: '#4D2615',
     textAlign: 'center',
-    paddingVertical: 5,
     fontFamily: 'azuki_font',
     width: '100%',
   },
@@ -420,15 +425,15 @@ const styles = StyleSheet.create({
     // Android 阴影
     elevation: 2,
   },
+  // 分类选择部分
   categoryContainer: {
     flex: 1,
     position: 'relative',
     marginRight: 8,
-    
   },
   pickerContainer: {
     flex: 1,
-    height: 50,
+    // height: 50,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
@@ -437,6 +442,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 10,
+    zIndex: 3,
     // iOS 阴影
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -444,8 +450,17 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     // Android 阴影
     elevation: 2,
-    
   },
+  categoryText: {
+    fontSize: 14,
+    color: '#4D2615',
+    fontFamily: 'azuki_font',
+    flex: 1,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  // 下拉菜单部分
   dropdown: {
     position: 'absolute',
     top: 52,
@@ -455,7 +470,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
-    maxHeight: 200,
+    // maxHeight: 200,
     zIndex: 1000,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -482,15 +497,7 @@ const styles = StyleSheet.create({
     color: '#1976d2',
     fontWeight: 'bold',
   },
-  categoryText: {
-    fontSize: 14,
-    color: '#4D2615',
-    fontFamily: 'azuki_font',
-    flex: 1,
-    textAlign: 'center',
-        paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
+  // 价格输入部分
   priceContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -505,7 +512,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingVertical: 8,
     backgroundColor: '#fff',
     fontSize: 14,
     // iOS 阴影
@@ -525,6 +532,7 @@ const styles = StyleSheet.create({
   removeButton: {
     padding: 4,
   },
+  // 添加按钮
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -537,6 +545,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderStyle: 'dashed',
     backgroundColor: '#f8f8f8',
+    zIndex: -2,
   },
   addButtonText: {
     marginLeft: 8,
@@ -544,6 +553,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'azuki_font',
   },
+  // 登录按钮
   registerButton: {
     backgroundColor: '#FFB6C1',
     borderRadius: 10,
@@ -553,6 +563,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 20,
     marginBottom: 40,
+        zIndex: -2,
+
   },
   registerButtonText: {
     color: '#4D2615',

@@ -19,7 +19,7 @@ function TabBarIcon({ imagePath, focused = false }: { imagePath: any; focused?: 
           width: 28, 
           height: 28, 
           marginBottom: -3,
-          tintColor: focused ? '#4D2615' : '#8B7355', // 根据激活状态改变颜色
+          tintColor: focused ? '#ffffff' : '#8B7355', // 根据激活状态改变颜色
         }} 
         resizeMode="contain" 
       />
@@ -78,7 +78,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'ホーム',
+            title: '',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabBarIcon 
@@ -115,7 +115,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="history"
           options={{
-            title: '履歴',
+            title: '',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabBarIcon 

@@ -8,6 +8,7 @@ interface SuccessAlertProps {
   message?: string;
   navigateTo?: string;
   onDataReload?: () => void;
+  onSuccess?: () => void; // 新增：成功回调
 }
 
 const SuccessAlert: React.FC<SuccessAlertProps> = ({ 
@@ -15,14 +16,24 @@ const SuccessAlert: React.FC<SuccessAlertProps> = ({
   onClose, 
   message = "登録しました",
   navigateTo = '/(tabs)/history',
-  onDataReload
+  onDataReload,
+  onSuccess
 }) => {
   
   // 处理确认按钮点击
   const handleConfirm = () => {
     onClose(); // 关闭弹窗
-    if (onDataReload) onDataReload(); // 重新加载数据
-    router.push(navigateTo as any); // 跳转页面
+    
+    // 先重新加载当前页面数据
+    if (onDataReload) onDataReload();
+    
+    // 执行成功回调
+    if (onSuccess) onSuccess();
+    
+    // 延迟跳转，确保数据保存完成
+    setTimeout(() => {
+      router.push(navigateTo as any);
+    }, 100);
   };
 
   return (
@@ -59,13 +70,20 @@ export function useSuccessAlert(
   const show = () => setVisible(true);
   const hide = () => setVisible(false);
 
-  const SuccessAlertComponent = ({ onDataReload }: { onDataReload?: () => void }) => (
+  const SuccessAlertComponent = ({ 
+    onDataReload, 
+    onSuccess 
+  }: { 
+    onDataReload?: () => void;
+    onSuccess?: () => void;
+  }) => (
     <SuccessAlert
       visible={visible}
       onClose={hide}
       message={message}
       navigateTo={navigateTo}
       onDataReload={onDataReload}
+      onSuccess={onSuccess}
     />
   );
 

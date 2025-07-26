@@ -72,6 +72,7 @@ export default function OCRResultScreen() {
   });
   const [shop, setShop] = useState<string>('');
   const [budget, setBudgetState] = useState<number>(30000);
+  const [hasBeenSaved, setHasBeenSaved] = useState<boolean>(false);
   
   // 使用独立的成功提示逻辑
   const { show: showSuccessAlert, SuccessAlertComponent } = useSuccessAlert();
@@ -150,10 +151,51 @@ export default function OCRResultScreen() {
       await AsyncStorage.setItem('app_budget', newBudget.toString());
       setBudgetState(newBudget);
 
+      // 检查是否来自手动输入
+      const isFromManualInput = params.shop && !params.image;
+      
+      if (isFromManualInput) {
+        // 如果来自手动输入，更新已存在的记录而不是添加新记录
+        const existingJson = await AsyncStorage.getItem('ocr_items');
+        const existingItems = existingJson ? JSON.parse(existingJson) : [];
+        
+        // 查找并更新最近的记录（假设是第一条记录）
+        if (existingItems.length > 0) {
+          existingItems[0] = {
+            items: results,
+            shop: shop,
+            date: existingItems[0].date, // 保持原始时间
+            total: total
+          };
+          
+          // 保存更新后的历史数据
+          await AsyncStorage.setItem('ocr_items', JSON.stringify(existingItems));
+        }
+      } else {
+        // 对于非手动输入的数据，添加新记录
+        const purchaseRecord = {
+          items: results,
+          shop: shop,
+          date: Date.now(),
+          total: total
+        };
+
+        // 读取现有的历史记录
+        const existingJson = await AsyncStorage.getItem('ocr_items');
+        const existingItems = existingJson ? JSON.parse(existingJson) : [];
+        
+        // 添加新记录到历史数据开头
+        const updatedItems = [purchaseRecord, ...existingItems];
+        
+        // 保存更新后的历史数据
+        await AsyncStorage.setItem('ocr_items', JSON.stringify(updatedItems));
+      }
+
+      // 标记为已保存
+      setHasBeenSaved(true);
+
       // 顯示成功提示
       showSuccessAlert();
-      
-      // 2秒後隱藏提示並跳轉
 
     } catch (error) {
       console.log('保存失败:', error);
@@ -190,8 +232,36 @@ export default function OCRResultScreen() {
     }
   }
 
+  // 处理返回按钮点击
+  const handleBack = () => {
+    // 检查来源，决定返回到哪个页面
+    const isFromManualInput = params.shop && !params.image;
+    
+    if (hasBeenSaved) {
+      // 如果已保存，直接跳转到 history 页面（因为成功提示已经处理了数据清除）
+      router.push('/(tabs)/history');
+    } else {
+      // 如果未保存，保留数据并返回到来源页面
+      if (isFromManualInput) {
+        // 从手动输入来的，返回手动输入页面（数据保留）
+        router.back();
+      } else {
+        // 从OCR扫描来的，返回相机页面
+        router.back();
+      }
+    }
+  };
+
   return (
     <View style={[styles.container, {backgroundColor:'#FFFFF5'}]}>
+      {/* 返回按钮 */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Image 
+          source={require('@/assets/images/returnbutton.png')} 
+          style={styles.backButtonImage}
+        />
+      </TouchableOpacity>
+      
       <View style={styles.readingResultTitle}>
         <Text style={{
     color: '#000',
@@ -286,7 +356,23 @@ export default function OCRResultScreen() {
       </ScrollView>
 
       {/* 成功提示組件 */}
-      <SuccessAlertComponent onDataReload={loadData} />
+      <SuccessAlertComponent 
+        onDataReload={loadData} 
+        onSuccess={() => {
+          const isFromManualInput = params.shop && !params.image;
+          
+          if (isFromManualInput) {
+            // 来自手动输入页面，需要清除手动输入页面的数据
+            router.push({
+              pathname: '/(tabs)/manualinput',
+              params: { clearData: 'true' }
+            });
+          } else {
+            // 来自OCR扫描，返回相机页面（不需要特殊清除逻辑）
+            router.push('/(tabs)/Camera');
+          }
+        }}
+      />
     </View>
   );
 }
@@ -303,7 +389,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    marginLeft: 15,
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    padding: 8,
+  },
+  backButtonImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   receiptImage: {
     width: '90%',

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity, View, StyleSheet, Text, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function getMonthRange(year: number, month: number) {
@@ -25,13 +25,23 @@ export default function HistoryScreen() {
   const [items, setItems] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
 
+  // 加载数据的函数
+  const loadData = async () => {
+    const json = await AsyncStorage.getItem("ocr_items");
+    const arr = json ? JSON.parse(json) : [];
+    setItems(arr);
+  };
+
   useEffect(() => {
-    (async () => {
-      const json = await AsyncStorage.getItem("ocr_items");
-      const arr = json ? JSON.parse(json) : [];
-      setItems(arr);
-    })();
+    loadData();
   }, []);
+
+  // 使用useFocusEffect确保页面获得焦点时刷新数据
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   useEffect(() => {
     // 过滤当前月
@@ -176,6 +186,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     width: '100%',
     alignSelf: isWeb ? 'center' : 'stretch',
+    fontFamily: "azuki_font",
+
   },
   titleContainer: {
     alignItems: "center",
@@ -185,7 +197,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 26,
     marginBottom: 24.5,
-    marginTop: 74,
+    marginTop: 40,
     fontFamily: "azuki_font",
   },
   monthSwitchContainer: {
@@ -262,12 +274,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginBottom: 8,
-    shadowColor: "#E0E0E0",
+    // shadowColor: "#E0E0E0",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,
     shadowRadius: 2,
     elevation: 1,
-    backgroundColor: "#FFF",
+    // backgroundColor: "#FFF",
   },
   recordText: {
     fontSize: 26,

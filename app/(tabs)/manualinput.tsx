@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, View, Text, ActionSheetIOS, Platform } from 'react-native';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
 export default function ManualInputScreen() {
+  const params = useLocalSearchParams();
 
   // 分类选项，与 ocrresult.tsx 保持一致
   const CATEGORY_OPTIONS = [
@@ -25,6 +26,19 @@ export default function ManualInputScreen() {
   const [shop, setShop] = useState('');
   // 用于电脑端下拉菜单的状态
   const [dropdownVisible, setDropdownVisible] = useState<number | null>(null);
+
+  // 检查是否需要清除数据
+  useEffect(() => {
+    if (params.clearData === 'true') {
+      // 清除页面数据
+      setItems([{ item: '', price: '', category: CATEGORY_OPTIONS[0] }]);
+      setShop('');
+      setDropdownVisible(null);
+      
+      // 清除路由参数，避免重复触发
+      router.replace('/(tabs)/manualinput');
+    }
+  }, [params.clearData]);
 
   // 添加新项目
   const addItem = () => {
@@ -142,6 +156,7 @@ export default function ManualInputScreen() {
           shop: shop
         }
       });
+      
     } catch (error) {
       Alert.alert('エラー', '保存に失敗しました');
     }
